@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}综合查询{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>查询结果</h1>
+</div>
+
+<div class="col-md-4">
+{% for line in record %}
+    <ul class="list-inline">
+        <li>卡号：{{ line.card_id }}</li>
+        <li>金额：{{ line.into_card }}</li>
+        <li>门店：{{ line.changer_id }}</li>
+        <li>日期：{{ line.change_time }}</li>
+    </ul>
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}会员卡详细信息{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>会员卡信息</h1>
+</div>
+<div class="col-md-4">
+    <ul>
+        <li>会员卡号：{{ cardnumber }}</li>
+        <li>开卡门店：{{ owner }}</li>
+        <li>卡内余额：{{ remaining }}</li>
+    </ul>
+</div>
+{% endblock %}

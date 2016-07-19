@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}管理员 - 添加营销方案{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>添加营销方案</h1>
+</div>
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+</div>
+{% if campaigns %}
+<div class="col-md-11">
+    <h2>所有营销方案</h2>
+<hr>
+</div>
+
+<div class="col-md-11">
+    {% for campaign in campaigns %}
+    <ul class="list-inline">
+        <li>
+        营销方案：{{ campaign.description }}
+        </li>
+        <li>
+        客户支付金额：{{ campaign.consumer_pay }}
+        </li>
+        <li>
+        实际入卡金额：{{ campaign.into_card }}
+        </li>
+    </ul>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
