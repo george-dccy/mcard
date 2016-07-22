@@ -76,8 +76,11 @@ def record():
     dateto = datetime.strptime(dateto, '%Y-%m-%d') + timedelta(days=1)
     user_id = request.args.get('user_id', 0, type=int)
     if user_id == 0:
-        record = Recharge.query.filter(Recharge.change_time>=datefrom).filter(Recharge.change_time<=dateto).all()
+        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname).\
+            filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
+            filter(Recharge.change_time>=datefrom).filter(Recharge.change_time<=dateto).all()
     else:
-        record = Recharge.query.filter(Recharge.change_time>=datefrom).filter(Recharge.change_time<=dateto).filter(Recharge.changer_id==user_id).all()
-
-    return render_template('admin/record.html', record=record)
+        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname).\
+            filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
+            filter(Recharge.change_time>=datefrom).filter(Recharge.change_time<=dateto).filter(User.id==user_id).all()
+    return render_template('admin/record.html', records=records)

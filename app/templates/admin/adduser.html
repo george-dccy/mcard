@@ -16,16 +16,25 @@
 <hr>
 </div>
 <div class="col-md-11">
+<table class="table table-hover">
+    <caption>所有用户</caption>
+    <thead>
+    <tr>
+        <th>用户名</th>
+        <th>门店名</th>
+        <th>添加时间</th>
+    </tr>
+    </thead>
+    <tbody>
     {% for user in allu %}
-    <ul class="list-inline">
-        <li>
-        用户名：{{ user.username }}
-        </li>
-        <li>
-        门店名：{{ user.branchname }}
-        </li>
-    </ul>
+    <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.branchname }}</td>
+        <td>{{ moment(user.last_seen).format('lll') }}</td>
+    </tr>
     {% endfor %}
+    </tbody>
+</table>
 </div>
 {% endif %}
 {% endblock %}

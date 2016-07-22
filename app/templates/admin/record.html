@@ -8,14 +8,27 @@
     <h1>查询结果</h1>
 </div>
 
-<div class="col-md-4">
-{% for line in record %}
-    <ul class="list-inline">
-        <li>卡号：{{ line.card_id }}</li>
-        <li>金额：{{ line.into_card }}</li>
-        <li>门店：{{ line.changer_id }}</li>
-        <li>日期：{{ line.change_time }}</li>
-    </ul>
-{% endfor %}
+<div class="col-md-11">
+<table class="table table-hover">
+    <caption>充值记录</caption>
+    <thead>
+    <tr>
+        <th>卡号</th>
+        <th>入卡金额</th>
+        <th>门店</th>
+        <th>充值日期</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for line in records %}
+    <tr>
+        <td>{{ line.cardnumber }}</td>
+        <td>{{ line.into_card }} 元</td>
+        <td>{{ line.branchname }}</td>
+        <td>{{ moment(line.change_time).format('lll') }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 </div>
 {% endblock %}

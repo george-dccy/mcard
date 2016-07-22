@@ -17,19 +17,26 @@
 </div>
 
 <div class="col-md-11">
+<table class="table table-hover">
+    <caption>方案清单</caption>
+    <thead>
+    <tr>
+        <th>营销方案</th>
+        <th>客户支付金额</th>
+        <th>实际入卡金额</th>
+    </tr>
+    </thead>
+    <tbody>
     {% for campaign in campaigns %}
-    <ul class="list-inline">
-        <li>
-        营销方案：{{ campaign.description }}
-        </li>
-        <li>
-        客户支付金额：{{ campaign.consumer_pay }}
-        </li>
-        <li>
-        实际入卡金额：{{ campaign.into_card }}
-        </li>
-    </ul>
+    <tr>
+        <td>{{ campaign.description }}</td>
+        <td>{{ campaign.consumer_pay }}</td>
+        <td>{{ campaign.into_card }}</td>
+    </tr>
     {% endfor %}
+    </tbody>
+</table>
 </div>
 {% endif %}
+
 {% endblock %}
