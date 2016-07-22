@@ -16,7 +16,7 @@
         <th>卡号</th>
         <th>入卡金额</th>
         <th>门店</th>
-        <th>充值日期</th>
+        <th>充值时间</th>
     </tr>
     </thead>
     <tbody>
@@ -25,7 +25,7 @@
         <td>{{ line.cardnumber }}</td>
         <td>{{ line.into_card }} 元</td>
         <td>{{ line.branchname }}</td>
-        <td>{{ moment(line.change_time).format('lll') }}</td>
+        <td>{{ moment(line.change_time).format('YYYY年M月D日 HH:mm:ss') }}</td>
     </tr>
     {% endfor %}
     </tbody>

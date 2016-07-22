@@ -30,7 +30,7 @@
     <tr>
         <td>{{ user.username }}</td>
         <td>{{ user.branchname }}</td>
-        <td>{{ moment(user.last_seen).format('lll') }}</td>
+        <td>{{ moment(user.last_seen).format('YYYY年M月D日 HH:mm:ss') }}</td>
     </tr>
     {% endfor %}
     </tbody>
