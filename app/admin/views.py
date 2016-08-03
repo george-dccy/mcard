@@ -20,7 +20,7 @@ def adduser():
         db.session.commit()
         flash('添加用户成功。')
         return redirect(url_for('admin.adduser'))
-    alluser = User.query.filter(User.role_id!=2).order_by(User.id.desc()).all()
+    alluser = User.query.filter(User.role_id!=1).order_by(User.id.desc()).all()
     return render_template('admin/adduser.html', form=form, allu=alluser)
 
 
