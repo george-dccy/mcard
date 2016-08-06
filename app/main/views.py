@@ -45,6 +45,7 @@ def recharge():
     if form.validate_on_submit():
         cardnumber = form.cardnumber.data
         campaign_id = form.campaign.data
+        channel = form.channel.data
         consumer_pay = form.consumer_pay.data
         card_id = Card.query.filter_by(cardnumber=cardnumber).one().id
         changer_id = current_user._get_current_object().id
@@ -52,6 +53,7 @@ def recharge():
         into_card = consumer_pay + int(consumer_pay/campaign.consumer_pay)*(campaign.into_card-campaign.consumer_pay)
         newrecharge = Recharge(card_id=card_id,
                                campaign_id=campaign_id,
+                               channel = channel,
                                changer_id=changer_id,
                                consumer_pay=consumer_pay,
                                into_card=into_card)
@@ -85,6 +87,8 @@ def consume():
         return redirect(url_for('main.card', card_id=card_id))
     return render_template('consume.html', form=form)
 
+
+
 @main.route('/cardlookup', methods=['GET', 'POST'])
 @login_required
 def cardlookup():
@@ -95,6 +99,7 @@ def cardlookup():
         return redirect(url_for('main.card', card_id=card.id))
     return render_template('cardlookup.html', form=form)
 
+
 @main.route('/card/<int:card_id>', methods=['GET'])
 @login_required
 def card(card_id):
@@ -102,4 +107,13 @@ def card(card_id):
     cardnumber = card.cardnumber
     owner = card.owner.branchname
     remaining = card.remaining
-    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining)
+    user_id = current_user._get_current_object().id
+    lastrecharge = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                   Recharge.consumer_pay,Recharge.channel).\
+        filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(Card.id==card.id).filter(User.id==user_id).\
+        order_by(Recharge.change_time.desc()).limit(2).all()
+    lastconsume = db.session.query(Consume.sn,Card.cardnumber,Consume.expense,User.branchname,Consume.change_time).\
+        filter(Card.id==card.id).filter(User.id==user_id).filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
+        order_by(Consume.change_time.desc()).limit(2).all()
+    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining, \
+                           lastrecharge=lastrecharge, lastconsume=lastconsume)

@@ -4,13 +4,17 @@
 {% block title %}管理员 - 添加营销方案{% endblock %}
 
 {% block page_content %}
+<div class="container">
 <div class="page-header">
-    <h1>添加营销方案</h1>
+    <h1>制订营销方案</h1>
 </div>
 <div class="col-md-4">
     {{ wtf.quick_form(form) }}
 </div>
+</div>
+    <br /><br />
 {% if campaigns %}
+<div class="container">
 <div class="col-md-11">
     <h2>所有营销方案</h2>
 <hr>
@@ -24,6 +28,8 @@
         <th>营销方案</th>
         <th>客户支付金额</th>
         <th>实际入卡金额</th>
+        <th>修改</th>
+        <th>删除</th>
     </tr>
     </thead>
     <tbody>
@@ -32,10 +38,20 @@
         <td>{{ campaign.description }}</td>
         <td>{{ campaign.consumer_pay }}</td>
         <td>{{ campaign.into_card }}</td>
+        <td><form name="altercampaign" action="{{ url_for('admin.alter_campaign', campaign_id=campaign.id)}}" method="get">
+                <input type="submit" value="修改" />
+            </form>
+        </td>
+        <td>
+            <form name="deletecampaign" action="{{ url_for('admin.delete_campaign', campaign_id=campaign.id)}}" method="get">
+                <input type="submit" value="删除" />
+            </form>
+        </td>
     </tr>
     {% endfor %}
     </tbody>
 </table>
+</div>
 </div>
 {% endif %}
 
