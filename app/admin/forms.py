@@ -29,13 +29,25 @@ class PasswordResetForm(Form):
         if User.query.filter_by(username=field.data).first() is None:
             raise ValidationError('用户不存在')
 
+
 class AddCampaignForm(Form):
     description = StringField('方案名称', validators=[DataRequired()])
     consumer_pay = FloatField('付款金额', validators=[DataRequired(),
                                                   NumberRange(min=0, max=None, message='充值金额不能小于0')])
-    into_card = FloatField('充值金额', validators=[DataRequired(),
+    into_card = FloatField('入卡金额', validators=[DataRequired(),
                                                   NumberRange(min=0, max=None, message='充值金额不能小于0')])
     submit = SubmitField('确认')
+
+
+class AlterCampaignForm(Form):
+    description = StringField('方案名称', validators=[DataRequired()])
+    consumer_pay = FloatField('付款金额', validators=[DataRequired(),
+                                                  NumberRange(min=0, max=None, message='充值金额不能小于0')])
+    into_card = FloatField('入卡金额', validators=[DataRequired(),
+                                                  NumberRange(min=0, max=None, message='充值金额不能小于0')])
+    submit = SubmitField('确认')
+
+
 
 class RecordLookupForm(Form):
     datefrom = DateField('开始日期', validators=[DataRequired()])

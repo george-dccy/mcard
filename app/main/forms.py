@@ -18,6 +18,7 @@ class NewCardForm(Form):
 class RechargeForm(Form):
     cardnumber = StringField('卡号', validators=[DataRequired(), Length(1, 20, message='卡号长度错误')])
     campaign = SelectField('营销方案', coerce=int)
+    channel = SelectField('付款方式', coerce=int, choices=[(1, '现金'), (2, '刷卡')])
     consumer_pay = FloatField('充值金额', validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField('充值')
 

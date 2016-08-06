@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, login_required, current_use
 from . import admin
 from .. import db
 from ..models import User, Role, Card, Campaign, Consume, Recharge
-from .forms import AddUserForm, PasswordResetForm, AddCampaignForm, RecordLookupForm
+from .forms import AddUserForm, PasswordResetForm, AddCampaignForm, RecordLookupForm, AlterCampaignForm
 from datetime import date, datetime, timedelta
 
 
@@ -18,7 +18,7 @@ def adduser():
                     branchname=form.branchname.data)
         db.session.add(user)
         db.session.commit()
-        flash('添加用户成功。')
+        flash('添加用户：“'+form.username.data+'” 成功。')
         return redirect(url_for('admin.adduser'))
     alluser = User.query.filter(User.role_id!=2).order_by(User.id.desc()).all()
     return render_template('admin/adduser.html', form=form, allu=alluser)
@@ -35,7 +35,7 @@ def password_reset():
             return redirect(url_for('main.index'))
         user.password = form.password.data
         db.session.commit()
-        flash('密码修改成功！')
+        flash(user.username+'的密码修改成功！')
         return redirect(url_for('main.index'))
     return render_template('admin/reset_password.html', form=form)
 
@@ -50,10 +50,39 @@ def add_campaign():
                             into_card=form.into_card.data)
         db.session.add(campaign)
         db.session.commit()
-        flash('添加营销方案成功。')
+        flash('添加营销方案：“'+form.description.data+'” 成功。')
         return redirect(url_for('admin.add_campaign'))
     campaigns = Campaign.query.order_by(Campaign.id.desc()).all()
     return render_template('admin/campaign.html', form=form, campaigns=campaigns)
+
+
+@admin.route('/alter_campaign/<int:campaign_id>', methods=['GET', 'POST'])
+@admin_required
+def alter_campaign(campaign_id):
+    form = AlterCampaignForm()
+    thisCampaign = Campaign.query.filter_by(id=campaign_id).one()
+    if form.validate_on_submit():
+        thisCampaign.description = form.description.data
+        thisCampaign.consumer_pay = form.consumer_pay.data
+        thisCampaign.into_card = form.into_card.data
+        db.session.add(thisCampaign)
+        db.session.commit()
+        flash('修改营销方案：“'+thisCampaign.description+'” 成功。')
+        return redirect(url_for('admin.add_campaign'))
+    form.description.data = thisCampaign.description
+    form.consumer_pay.data = thisCampaign.consumer_pay
+    form.into_card.data = thisCampaign.into_card
+    return render_template('admin/campaign.html', form=form, campaigns=None)
+
+@admin.route('/delete_campaign/<int:campaign_id>', methods=['GET'])
+@admin_required
+def delete_campaign(campaign_id):
+    thisCampaign = Campaign.query.filter_by(id=campaign_id).one()
+    db.session.delete(thisCampaign)
+    db.session.commit()
+    flash('删除营销方案： “'+thisCampaign.description+'” 成功。')
+    return redirect(url_for('admin.add_campaign'))
+
 
 @admin.route('/recordlookup', methods=['GET', 'POST'])
 @admin_required
@@ -72,15 +101,20 @@ def recordlookup():
 def record():
     datefrom = request.args.get('datefrom', date.today().strftime('Y-%m-%d'), type=str)
     dateto = request.args.get('dateto', date.today().strftime('%Y-%m-%d'), type=str)
-    datefrom = datetime.strptime(datefrom, '%Y-%m-%d') - timedelta(days=1)
-    dateto = datetime.strptime(dateto, '%Y-%m-%d') + timedelta(days=1)
+    datefrom2 = datetime.strptime(datefrom, '%Y-%m-%d') - timedelta(hours=12)
+    dateto2 = datetime.strptime(dateto, '%Y-%m-%d') + timedelta(hours=12)
     user_id = request.args.get('user_id', 0, type=int)
     if user_id == 0:
-        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname).\
+        branchname = "全部门店"
+        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                   Recharge.consumer_pay,Recharge.channel).\
             filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
-            filter(Recharge.change_time>=datefrom).filter(Recharge.change_time<=dateto).all()
+            filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
     else:
-        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname).\
+        user = User.query.filter_by(id=user_id).one()
+        branchname = user.branchname
+        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                   Recharge.consumer_pay,Recharge.channel).\
             filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
-            filter(Recharge.change_time>=datefrom).filter(Recharge.change_time<=dateto).filter(User.id==user_id).all()
-    return render_template('admin/record.html', records=records)
+            filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).filter(User.id==user_id).all()
+    return render_template('admin/record.html', records=records, datefrom=datefrom, dateto=dateto, branchname=branchname)

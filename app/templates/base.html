@@ -42,7 +42,7 @@
                 {% if current_user.is_authenticated %}
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        账户<b class="caret"></b>
+                        {{ current_user.username }}<b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('auth.logout') }}">注销</a></li>
@@ -76,6 +76,7 @@
 {{ moment.lang("zh-CN") }}
 <script src="{{ url_for('static', filename='bootstrap-datepicker.js') }}"></script>
 <script src="{{ url_for('static', filename='bootstrap-datepicker.zh-CN.js') }}"></script>
+<script src="{{ url_for('static', filename='LodopFuncs.js') }}"></script>
     <!-- HTML5 Shim 和 Respond.js 用于让 IE8 支持 HTML5元素和媒体查询 -->
       <!--[if lt IE 9]>
          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>

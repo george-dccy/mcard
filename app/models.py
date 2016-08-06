@@ -1,4 +1,5 @@
 from datetime import datetime
+from random import randint
 from flask.ext.moment import Moment
 import hashlib
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -139,6 +140,10 @@ class Recharge(db.Model):
     consumer_pay = db.Column(db.Float, nullable=False)
     into_card = db.Column(db.Float, nullable=False)
     change_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    #充值渠道，默认为1，表示现金，2表示刷卡
+    channel = db.Column(db.Integer, default=1)
+    #充值流水号，由类别码、分店id、时间和3位随机码组成，字符串格式，21位
+    sn = db.Column(db.String(21))
 
     def __init__(self, **kwargs):
         super(Recharge, self).__init__(**kwargs)
@@ -146,6 +151,23 @@ class Recharge(db.Model):
         if card:
             card.remaining = card.remaining + self.into_card
             db.session.commit()
+        #初始化时生成sn
+        #充值类别码为10
+        prefix = '10'
+        #生成分店ID
+        if len(str(self.changer_id)) == 1:
+            bNum = '000' + str(self.changer_id)
+        elif len(str(self.changer_id)) == 2:
+            bNum = '00' + str(self.changer_id)
+        elif len(str(self.changer_id)) == 3:
+            bNum = '0' + str(self.changer_id)
+        else:
+            bNum = str(self.changer_id)
+        #生成时间码
+        nowTime=datetime.now().strftime("%Y%m%d%H%M")
+        #生成三位随机数
+        randomNum=randint(100, 999)
+        self.sn = prefix + bNum + str(nowTime) + str(randomNum)
 
 
 class Consume(db.Model):
@@ -155,6 +177,7 @@ class Consume(db.Model):
     card_id = db.Column(db.Integer, db.ForeignKey('cards.id'))
     expense = db.Column(db.Float, nullable=False)
     change_time = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    sn = db.Column(db.String(21))
 
     def __init__(self, **kwargs):
         super(Consume, self).__init__(**kwargs)
@@ -162,6 +185,22 @@ class Consume(db.Model):
         if card.remaining:
             card.remaining = card.remaining - self.expense
             db.session.commit()
+        #消费类别码为11
+        prefix = '11'
+        #生成分店ID
+        if len(str(self.changer_id)) == 1:
+            bNum = '000' + str(self.changer_id)
+        elif len(str(self.changer_id)) == 2:
+            bNum = '00' + str(self.changer_id)
+        elif len(str(self.changer_id)) == 3:
+            bNum = '0' + str(self.changer_id)
+        else:
+            bNum = str(self.changer_id)
+        #生成时间码
+        nowTime=datetime.now().strftime("%Y%m%d%H%M")
+        #生成三位随机数
+        randomNum=randint(100, 999)
+        self.sn = prefix + bNum + str(nowTime) + str(randomNum)
 
 
 class Campaign(db.Model):
