@@ -31,6 +31,10 @@ class RechargeForm(Form):
         if Card.query.filter_by(cardnumber=field.data).first() is None:
             raise ValidationError('该卡不存在')
 
+    def validate_campaign(self, field):
+        if field.data is None:
+            raise ValidationError('请联系管理员制订营销方案')
+
 
 class ConsumeForm(Form):
     cardnumber = StringField('卡号', validators=[DataRequired(), Length(1, 20, message='卡号长度错误')])

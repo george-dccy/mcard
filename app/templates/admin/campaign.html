@@ -38,14 +38,16 @@
         <td>{{ campaign.description }}</td>
         <td>{{ campaign.consumer_pay }}</td>
         <td>{{ campaign.into_card }}</td>
-        <td><form name="altercampaign" action="{{ url_for('admin.alter_campaign', campaign_id=campaign.id)}}" method="get">
+        <td>{% if campaign.id != 1 %}<form name="altercampaign" action="{{ url_for('admin.alter_campaign', campaign_id=campaign.id)}}" method="get">
                 <input type="submit" value="修改" />
             </form>
+            {% endif %}
         </td>
         <td>
-            <form name="deletecampaign" action="{{ url_for('admin.delete_campaign', campaign_id=campaign.id)}}" method="get">
+            {% if campaign.id != 1 %}<form name="deletecampaign" action="{{ url_for('admin.delete_campaign', campaign_id=campaign.id)}}" method="get">
                 <input type="submit" value="删除" />
             </form>
+            {% endif %}
         </td>
     </tr>
     {% endfor %}

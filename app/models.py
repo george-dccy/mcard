@@ -206,7 +206,13 @@ class Consume(db.Model):
 class Campaign(db.Model):
     __tablename__ = 'campaigns'
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(200))
+    description = db.Column(db.String(200), unique=True)
     consumer_pay = db.Column(db.Integer)
     into_card = db.Column(db.Integer)
     recharges = db.relationship('Recharge', backref='campaigns', lazy='dynamic')
+
+    @staticmethod
+    def insert_none_campaign():
+        none_campaign = Campaign(description='正常充值', consumer_pay=1, into_card=1)
+        db.session.add(none_campaign)
+        db.session.commit()
