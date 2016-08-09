@@ -78,5 +78,8 @@ def deploy():
     # add admin
     User.insert_admin()
 
+    # add none_campaign for usual recharge
+    Campaign.insert_none_campaign()
+
 if __name__ == '__main__':
     manager.run()
