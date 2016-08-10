@@ -13,6 +13,7 @@
     <div class="tab-pane">
         {% if current_user.is_authenticated %}
         <p>当前时间为：{{ moment(current_time).format('YYYY年M月D日 HH:mm:ss') }}</p>
+        <p>登录地址为：{{ user_ip }}</p>
         <p>您在{{ moment(current_time).fromNow(refresh=True) }}登录本页。</p>
         <p>请选择相应业务</p>
         {% endif %}

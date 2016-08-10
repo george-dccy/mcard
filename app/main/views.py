@@ -21,7 +21,8 @@ def after_request(response):
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', current_time=datetime.utcnow())
+    user_ip = request.remote_addr
+    return render_template('index.html', current_time=datetime.utcnow(), user_ip=user_ip)
 
 @main.route('/newcard', methods=['GET', 'POST'])
 @login_required
