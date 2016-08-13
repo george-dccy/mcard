@@ -1,12 +1,14 @@
 from app.decorators import admin_required
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, send_file
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from . import admin
 from .. import db
 from ..models import User, Role, Card, Campaign, Consume, Recharge
 from .forms import AddUserForm, PasswordResetForm, AddCampaignForm, RecordLookupForm, AlterCampaignForm
 from datetime import date, datetime, timedelta
-
+import xlsxwriter
+import io
+from sqlalchemy import func
 
 @admin.route('/adduser', methods=['GET', 'POST'])
 @admin_required
@@ -118,3 +120,40 @@ def record():
             filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
             filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).filter(User.id==user_id).all()
     return render_template('admin/record.html', records=records, datefrom=datefrom, dateto=dateto, branchname=branchname)
+
+
+@admin.route('/cardreport', methods=['GET'])
+@admin_required
+def cardreport():
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+    worksheet = workbook.add_worksheet()
+
+    cards = db.session.query(Card.cardnumber.label('c'), User.branchname.label('b'), Card.remaining.label('r')).\
+        filter(Card.owner_id==User.id).order_by(Card.id).all()
+    total = db.session.query(func.sum(Card.remaining))
+    bold = workbook.add_format({'bold': True})
+    money = workbook.add_format({'num_format': '#,##0'})
+    worksheet.write(0, 0, '卡报表', bold)
+    worksheet.write(1, 0, '卡号', bold)
+    worksheet.write(1, 1, '开卡门店名', bold)
+    worksheet.write(1, 2, '卡内余额(元)', bold)
+
+    row = 2
+    col = 0
+    for onecard in cards:
+        worksheet.write(row, col, onecard.c)
+        worksheet.write(row, col+1, onecard.b)
+        worksheet.write(row, col+2, onecard.r, money)
+        row += 1
+    worksheet.write(row+1, col, '余额总计', bold)
+    worksheet.write(row+1, col+2, total[0][0], money)
+    workbook.close()
+    output.seek(0)
+    return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
+                     as_attachment=True, attachment_filename='cardReport.xlsx')
+
+    #column_names = ['卡号', '开卡门店', '余额']
+    #filename = "Card Report" + datetime.utcnow().strftime("YYYYMMDDHHmmss")
+    #return excel.make_response_from_query_sets(cards, column_names, "xls")
+    #return "great"
