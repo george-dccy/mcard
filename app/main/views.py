@@ -60,8 +60,12 @@ def recharge():
                                into_card=into_card)
         db.session.add(newrecharge)
         db.session.commit()
-        flash('充值成功。')
-        return redirect(url_for('main.card', card_id=card_id))
+        lastrecharge = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                        Recharge.consumer_pay,Recharge.channel,Card.remaining).\
+            filter(Recharge.card_id==card_id).filter(Recharge.changer_id==User.id).filter(Card.id==card_id).filter(User.id==changer_id).\
+            order_by(Recharge.change_time.desc()).limit(2).all()
+        #flash('充值成功。')
+        return render_template('printrecharge.html', lastrecharge=lastrecharge)
     return render_template('recharge.html', form=form)
 
 
@@ -84,8 +88,11 @@ def consume():
                              expense=expense)
         db.session.add(newconsume)
         db.session.commit()
-        flash('消费成功。')
-        return redirect(url_for('main.card', card_id=card_id))
+        lastconsume = db.session.query(Consume.sn,Card.cardnumber,Consume.expense,User.branchname,Consume.change_time,Card.remaining).\
+            filter(Card.id==card_id).filter(User.id==changer_id).filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
+            order_by(Consume.change_time.desc()).limit(2).all()
+        #flash('消费成功。')
+        return render_template('printconsume.html', lastconsume=lastconsume)
     return render_template('consume.html', form=form)
 
 
@@ -108,13 +115,13 @@ def card(card_id):
     cardnumber = card.cardnumber
     owner = card.owner.branchname
     remaining = card.remaining
-    user_id = current_user._get_current_object().id
-    lastrecharge = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
-                                   Recharge.consumer_pay,Recharge.channel).\
-        filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(Card.id==card.id).filter(User.id==user_id).\
-        order_by(Recharge.change_time.desc()).limit(2).all()
-    lastconsume = db.session.query(Consume.sn,Card.cardnumber,Consume.expense,User.branchname,Consume.change_time).\
-        filter(Card.id==card.id).filter(User.id==user_id).filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
-        order_by(Consume.change_time.desc()).limit(2).all()
-    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining, \
-                           lastrecharge=lastrecharge, lastconsume=lastconsume)
+#    user_id = current_user._get_current_object().id
+#    lastrecharge = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+#                                   Recharge.consumer_pay,Recharge.channel).\
+#        filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(Card.id==card.id).filter(User.id==user_id).\
+#        order_by(Recharge.change_time.desc()).limit(2).all()
+#    lastconsume = db.session.query(Consume.sn,Card.cardnumber,Consume.expense,User.branchname,Consume.change_time).\
+#        filter(Card.id==card.id).filter(User.id==user_id).filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
+#        order_by(Consume.change_time.desc()).limit(2).all()
+    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining,)
+#    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining, lastrecharge=lastrecharge, lastconsume=lastconsume)
