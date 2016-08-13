@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}消费打印{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+        var LODOP; //声明为全局变量
+	function ConsumePrint() {
+		CreateConsumePrintPage();
+		LODOP.PRINT();
+        window.location.replace("consume")
+	};
+	function ConsumePreview() {
+		CreateConsumePrintPage();
+		LODOP.PREVIEW();
+        window.location.replace("consume")
+	};
+
+    function AddTitle(){
+		LODOP=getLodop();
+		LODOP.PRINT_INIT("凭证打印");
+		LODOP.ADD_PRINT_TEXT(15,65,300,25,"天福茗茶欢迎您");
+		LODOP.SET_PRINT_STYLEA(1,"FontName","隶书");
+		LODOP.SET_PRINT_STYLEA(1,"FontSize",18);
+		LODOP.ADD_PRINT_TEXT(90,15,100,20,"流水号  ");
+		LODOP.SET_PRINT_STYLEA(2,"FontSize",10);
+		LODOP.SET_PRINT_STYLEA(2,"Bold",1);
+		LODOP.ADD_PRINT_TEXT(120,15,100,20,"卡号  ");
+		LODOP.SET_PRINT_STYLEA(3,"FontSize",10);
+		LODOP.SET_PRINT_STYLEA(3,"Bold",1);
+		LODOP.ADD_PRINT_TEXT(150,15,100,20,"店名  ");
+		LODOP.SET_PRINT_STYLEA(4,"FontSize",10);
+		LODOP.SET_PRINT_STYLEA(4,"Bold",1);
+		LODOP.ADD_PRINT_TEXT(180,15,100,20,"时间  ");
+		LODOP.SET_PRINT_STYLEA(5,"FontSize",10);
+		LODOP.SET_PRINT_STYLEA(5,"Bold",1);
+        LODOP.ADD_PRINT_TEXT(210,15,100,20,"消费金额");
+		LODOP.SET_PRINT_STYLEA(6,"FontSize",10);
+		LODOP.SET_PRINT_STYLEA(6,"Bold",1);
+        LODOP.ADD_PRINT_TEXT(240,15,100,20,"卡内余额");
+		LODOP.SET_PRINT_STYLEA(7,"FontSize",10);
+		LODOP.SET_PRINT_STYLEA(7,"Bold",1);
+		LODOP.ADD_PRINT_LINE(70,10,70,280,0,2);
+	};
+	function CreateConsumePrintPage() {
+		AddTitle();
+        LODOP.SET_PRINT_PAGESIZE(3,760,50,""); //设定纸张大小
+		LODOP.SET_PRINT_STYLE("FontSize",10);
+		LODOP.ADD_PRINT_TEXT(42,115,100,25,"消费凭证");
+		LODOP.SET_PRINT_STYLEA(9,"FontName","楷书");
+		LODOP.SET_PRINT_STYLEA(9,"FontSize",13);
+		LODOP.ADD_PRINT_TEXT(90,85,300,20,{{ lastconsume[0].sn|tojson|safe }});
+		LODOP.ADD_PRINT_TEXT(120,85,300,20,{{ lastconsume[0].cardnumber|tojson|safe }});
+		LODOP.ADD_PRINT_TEXT(150,85,300,20,{{ lastconsume[0].branchname|tojson|safe }});
+		LODOP.ADD_PRINT_TEXT(180,85,300,20,moment({{ lastconsume[0].change_time|tojson|safe }}).format(('YYYY-M-D HH:mm:ss')));
+        LODOP.ADD_PRINT_TEXT(210,85,300,20,{{ lastconsume[0].expense|tojson|safe }} + " 元");
+        LODOP.ADD_PRINT_TEXT(240,85,300,20,{{ lastconsume[0].remaining|tojson|safe }} + " 元");
+        LODOP.ADD_PRINT_BARCODE(280,90,128,128,"QRCode",{{ lastconsume[0].sn|tojson|safe }});
+	};
+    window.onload=ConsumePreview;
+
+</script>
+{% endblock %}
