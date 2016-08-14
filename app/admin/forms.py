@@ -52,6 +52,7 @@ class AlterCampaignForm(Form):
 class RecordLookupForm(Form):
     datefrom = DateField('开始日期', validators=[DataRequired()])
     dateto = DateField('结束日期', validators=[DataRequired()])
+    category = SelectField('类别', coerce=int, choices=[(1, '充值'), (2, '消费')])
     branchname = SelectField('门店', coerce=int)
     submit = SubmitField('查询')
 

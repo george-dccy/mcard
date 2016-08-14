@@ -93,33 +93,51 @@ def recordlookup():
     if form.validate_on_submit():
         datefrom = form.datefrom.data.strftime('%Y-%m-%d')
         dateto = form.dateto.data.strftime('%Y-%m-%d')
+        category = form.category.data
         user_id = form.branchname.data
-        return redirect(url_for('admin.record', datefrom=datefrom, dateto=dateto, user_id=user_id))
+        return redirect(url_for('admin.record', datefrom=datefrom, dateto=dateto, user_id=user_id, category=category))
     return render_template('admin/recordlookup.html', form=form)
 
 
 @admin.route('/record', methods=['GET', 'POST'])
 @admin_required
 def record():
-    datefrom = request.args.get('datefrom', date.today().strftime('Y-%m-%d'), type=str)
+    datefrom = request.args.get('datefrom', date.today().strftime('%Y-%m-%d'), type=str)
     dateto = request.args.get('dateto', date.today().strftime('%Y-%m-%d'), type=str)
-    datefrom2 = datetime.strptime(datefrom, '%Y-%m-%d') - timedelta(hours=12)
-    dateto2 = datetime.strptime(dateto, '%Y-%m-%d') + timedelta(hours=12)
+    datefrom2 = datetime.strptime(datefrom, '%Y-%m-%d') - timedelta(hours=8)
+    dateto2 = datetime.strptime(dateto, '%Y-%m-%d') + timedelta(hours=16)
     user_id = request.args.get('user_id', 0, type=int)
+    category = request.args.get('category', 0, type=int)
     if user_id == 0:
         branchname = "全部门店"
-        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
-                                   Recharge.consumer_pay,Recharge.channel).\
-            filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
-            filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
+        if category == 1:
+            category_name = "充值"
+            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                       Recharge.consumer_pay,Recharge.channel).\
+                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
+                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
+        else:
+            category_name = "消费"
+            records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+                filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).all()
     else:
         user = User.query.filter_by(id=user_id).one()
         branchname = user.branchname
-        records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
-                                   Recharge.consumer_pay,Recharge.channel).\
-            filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
-            filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).filter(User.id==user_id).all()
-    return render_template('admin/record.html', records=records, datefrom=datefrom, dateto=dateto, branchname=branchname)
+        if category == 1:
+            category_name = "充值"
+            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                       Recharge.consumer_pay,Recharge.channel).\
+                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(User.id==user_id).\
+                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
+        else:
+            category_name = "消费"
+            records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+                filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).filter(User.id==user_id).\
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).all()
+
+    return render_template('admin/record.html', records=records, datefrom=datefrom, dateto=dateto, \
+                           branchname=branchname, category_name=category_name, user_id=user_id, category=category)
 
 
 @admin.route('/cardreport', methods=['GET'])
@@ -132,6 +150,7 @@ def cardreport():
     cards = db.session.query(Card.cardnumber.label('c'), User.branchname.label('b'), Card.remaining.label('r')).\
         filter(Card.owner_id==User.id).order_by(Card.id).all()
     total = db.session.query(func.sum(Card.remaining))
+
     bold = workbook.add_format({'bold': True})
     money = workbook.add_format({'num_format': '#,##0'})
     worksheet.write(0, 0, '卡报表', bold)
@@ -153,7 +172,131 @@ def cardreport():
     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
                      as_attachment=True, attachment_filename='cardReport.xlsx')
 
-    #column_names = ['卡号', '开卡门店', '余额']
-    #filename = "Card Report" + datetime.utcnow().strftime("YYYYMMDDHHmmss")
-    #return excel.make_response_from_query_sets(cards, column_names, "xls")
-    #return "great"
+
+@admin.route('/printrecord', methods=['GET'])
+@admin_required
+def printrecord():
+    datefrom = request.args.get('datefrom', date.today().strftime('%Y-%m-%d'), type=str)
+    dateto = request.args.get('dateto', date.today().strftime('%Y-%m-%d'), type=str)
+    datefrom2 = datetime.strptime(datefrom, '%Y-%m-%d') - timedelta(hours=8)
+    dateto2 = datetime.strptime(dateto, '%Y-%m-%d') + timedelta(hours=16)
+    category = request.args.get('category', 0, type=int)
+    user_id = request.args.get('user_id', 0, type=int)
+
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+    worksheet = workbook.add_worksheet()
+    worksheet.set_row(0, height=30)
+    worksheet.set_column(0, 0, width=25)
+    worksheet.set_column(1, 1, width=15)
+    bold = workbook.add_format({'bold': True})
+    money = workbook.add_format({'num_format': '#,##0'})
+    merge_format = workbook.add_format({
+        'bold':     True,
+        'align':    'center',
+        'valign':   'vcenter',
+        'font_size': 14,
+    })
+
+    if category == 1:
+        category_name = "充值"
+        if user_id == 0:
+            branchname = "全部门店"
+            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                       Recharge.consumer_pay,Recharge.channel).\
+                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
+                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
+            total = db.session.query(func.sum(Recharge.consumer_pay)).\
+                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
+                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2)
+        else:
+            user = User.query.filter_by(id=user_id).one()
+            branchname = user.branchname
+            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
+                                       Recharge.consumer_pay,Recharge.channel).\
+                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(User.id==user_id).\
+                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
+            total = db.session.query(func.sum(Recharge.consumer_pay)).\
+                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(User.id==user_id).\
+                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2)
+
+        worksheet.set_column(5, 5, width=15)
+        worksheet.set_column(6, 6, width=20)
+
+        worksheet.merge_range('A1:G1', datefrom+' 00:00:00 到'+dateto+' 24:00:00 在'+branchname+'的'+category_name+'记录', merge_format)
+        worksheet.write(1, 0, '流水号', bold)
+        worksheet.write(1, 1, '卡号', bold)
+        worksheet.write(1, 2, '支付方式', bold)
+        worksheet.write(1, 3, '支付金额', bold)
+        worksheet.write(1, 4, '入卡金额', bold)
+        worksheet.write(1, 5, '门店', bold)
+        worksheet.write(1, 6, '充值时间', bold)
+
+        row = 2
+        col = 0
+        for onerecord in records:
+            worksheet.write(row, col, onerecord.sn)
+            worksheet.write(row, col+1, onerecord.cardnumber)
+            if onerecord.channel == 1:
+                worksheet.write(row, col+2, "现金")
+            else:
+                worksheet.write(row, col+2, "刷卡")
+            worksheet.write(row, col+3, onerecord.consumer_pay, money)
+            worksheet.write(row, col+4, onerecord.into_card, money)
+            worksheet.write(row, col+5, onerecord.branchname)
+            worksheet.write(row, col+6, (onerecord.change_time+timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S'))
+            row += 1
+        worksheet.write(row+1, col, '充值总计', bold)
+        worksheet.write(row+1, col+3, total[0][0], money)
+        workbook.close()
+        output.seek(0)
+        filename = 'rechargeRecord' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+        return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
+                         as_attachment=True, attachment_filename=filename)
+    else:
+        category_name = "消费"
+        if user_id == 0:
+            branchname = "全部门店"
+            records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+                filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).all()
+            total = db.session.query(func.sum(Consume.expense)).\
+                filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2)
+        else:
+            user = User.query.filter_by(id=user_id).one()
+            branchname = user.branchname
+            records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+                filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).filter(User.id==user_id).\
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).all()
+            total = db.session.query(func.sum(Consume.expense)).\
+                filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).filter(User.id==user_id).\
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2)
+
+        worksheet.set_column(3, 3, width=15)
+        worksheet.set_column(4, 4, width=20)
+
+        worksheet.merge_range('A1:E1', datefrom+' 00:00:00 到'+dateto+' 24:00:00 在'+branchname+'的'+category_name+'记录', merge_format)
+
+        worksheet.write(1, 0, '流水号', bold)
+        worksheet.write(1, 1, '卡号', bold)
+        worksheet.write(1, 2, '消费金额', bold)
+        worksheet.write(1, 3, '门店', bold)
+        worksheet.write(1, 4, '消费时间', bold)
+
+        row = 2
+        col = 0
+        for onerecord in records:
+            worksheet.write(row, col, onerecord.sn)
+            worksheet.write(row, col+1, onerecord.cardnumber)
+            worksheet.write(row, col+2, onerecord.expense, money)
+            worksheet.write(row, col+3, onerecord.branchname)
+            worksheet.write(row, col+4, (onerecord.change_time+timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S'))
+            row += 1
+        worksheet.write(row+1, col, '消费总计', bold)
+        worksheet.write(row+1, col+2, total[0][0], money)
+        workbook.close()
+        output.seek(0)
+        filename = 'rechargeRecord' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+        return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
+                         as_attachment=True, attachment_filename=filename)
