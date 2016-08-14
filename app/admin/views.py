@@ -215,7 +215,19 @@ def cardreport():
 
     bold = workbook.add_format({'bold': True})
     money = workbook.add_format({'num_format': '#,##0'})
-    worksheet.write(0, 0, '卡报表', bold)
+    merge_format = workbook.add_format({
+        'bold':     True,
+        'align':    'center',
+        'valign':   'vcenter',
+        'font_size': 14,
+    })
+
+    worksheet.merge_range('A1:C1', '所有会员卡列表', merge_format)
+    worksheet.set_row(0,height=30)
+    worksheet.set_column(0,0,width=25)
+    worksheet.set_column(1,1,width=15)
+    worksheet.set_column(2,2,width=20)
+
     worksheet.write(1, 0, '卡号', bold)
     worksheet.write(1, 1, '开卡门店名', bold)
     worksheet.write(1, 2, '卡内余额(元)', bold)
@@ -231,8 +243,9 @@ def cardreport():
     worksheet.write(row+1, col+2, total[0][0], money)
     workbook.close()
     output.seek(0)
+    filename = 'cardReport' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
-                     as_attachment=True, attachment_filename='cardReport.xlsx')
+                     as_attachment=True, attachment_filename=filename)
 
 
 @admin.route('/printrecord', methods=['GET'])
