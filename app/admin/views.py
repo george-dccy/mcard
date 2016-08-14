@@ -15,15 +15,60 @@ from sqlalchemy import func
 def adduser():
     form = AddUserForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data,
-                    password=form.password.data,
-                    branchname=form.branchname.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('添加用户：“'+form.username.data+'” 成功。')
-        return redirect(url_for('admin.adduser'))
-    alluser = User.query.filter(User.role_id!=2).order_by(User.id.desc()).all()
+        if User.query.filter_by(username=form.username.data).first():
+            active_flag = db.session.query(User.active_flag).filter(User.username==form.username.data).all()
+            if active_flag[0][0] == -1:
+                thisuser = User.query.filter_by(username=form.username.data).first()
+                thisuser.active_flag = 1
+                thisuser.password = form.password.data
+                db.session.add(thisuser)
+                db.session.commit()
+                flash('成功恢复用户：'+thisuser.branchname+'，并使用新的密码登录')
+                return redirect(url_for('admin.adduser'))
+            else:
+                flash('用户已存在')
+                return redirect(url_for('admin.adduser'))
+        else:
+            user = User(username=form.username.data,
+                        password=form.password.data,
+                        branchname=form.branchname.data)
+            db.session.add(user)
+            db.session.commit()
+            flash('添加用户：“'+form.username.data+'” 成功。')
+            return redirect(url_for('admin.adduser'))
+    alluser = User.query.filter(User.role_id!=2).filter(User.active_flag!=-1).order_by(User.id.desc()).all()
     return render_template('admin/adduser.html', form=form, allu=alluser)
+
+
+@admin.route('/alter_user/<int:user_id>', methods=['GET', 'POST'])
+@admin_required
+def alter_user(user_id):
+    form = AddUserForm()
+    thisuser = User.query.filter_by(id=user_id).one()
+    if form.validate_on_submit():
+        thisuser.username=form.username.data
+        thisuser.branchname=form.branchname.data
+        thisuser.password=form.password.data
+        db.session.add(thisuser)
+        db.session.commit()
+        flash('成功修改用户：'+thisuser.branchname)
+        return redirect(url_for('admin.adduser'))
+    form.username.data=thisuser.username
+    form.branchname.data=thisuser.branchname
+    return render_template('admin/adduser.html', form=form, allu=None)
+
+
+@admin.route('/delete_user/<int:user_id>', methods=['GET', 'POST'])
+@admin_required
+def delete_user(user_id):
+    thisuser = User.query.filter_by(id=user_id).one()
+    username = thisuser.branchname
+    thisuser.active_flag = -1
+    db.session.add(thisuser)
+    db.session.commit()
+    flash('用户：'+username+'删除成功')
+    return redirect(url_for('admin.adduser'))
+
 
 
 @admin.route('/reset', methods=['GET', 'POST'])
@@ -47,14 +92,29 @@ def password_reset():
 def add_campaign():
     form = AddCampaignForm()
     if form.validate_on_submit():
-        campaign = Campaign(description=form.description.data,
-                            consumer_pay=form.consumer_pay.data,
-                            into_card=form.into_card.data)
-        db.session.add(campaign)
-        db.session.commit()
-        flash('添加营销方案：“'+form.description.data+'” 成功。')
-        return redirect(url_for('admin.add_campaign'))
-    campaigns = Campaign.query.order_by(Campaign.id.desc()).all()
+        if Campaign.query.filter_by(description=form.description.data).first():
+            active_flag = db.session.query(Campaign.active_flag).filter_by(description=form.description.data).all()
+            if active_flag[0][0] == -1:
+                thiscampaign = Campaign.query.filter_by(description=form.description.data).first()
+                thiscampaign.active_flag = 1
+                thiscampaign.consumer_pay = form.consumer_pay.data
+                thiscampaign.into_card = form.into_card.data
+                db.session.add(thiscampaign)
+                db.session.commit()
+                flash('成功恢复营销方案：'+thiscampaign.description+'，并使用新的方案。')
+                return redirect(url_for('admin.add_campaign'))
+            else:
+                flash('该方案已存在，请重试。')
+                return redirect(url_for('admin.add_campaign'))
+        else:
+            campaign = Campaign(description=form.description.data,
+                                consumer_pay=form.consumer_pay.data,
+                                into_card=form.into_card.data)
+            db.session.add(campaign)
+            db.session.commit()
+            flash('添加营销方案：“'+form.description.data+'” 成功。')
+            return redirect(url_for('admin.add_campaign'))
+    campaigns = Campaign.query.filter(Campaign.active_flag!=-1).order_by(Campaign.id.desc()).all()
     return render_template('admin/campaign.html', form=form, campaigns=campaigns)
 
 
@@ -76,11 +136,13 @@ def alter_campaign(campaign_id):
     form.into_card.data = thisCampaign.into_card
     return render_template('admin/campaign.html', form=form, campaigns=None)
 
+
 @admin.route('/delete_campaign/<int:campaign_id>', methods=['GET'])
 @admin_required
 def delete_campaign(campaign_id):
     thisCampaign = Campaign.query.filter_by(id=campaign_id).one()
-    db.session.delete(thisCampaign)
+    thisCampaign.active_flag = -1
+    db.session.add(thisCampaign)
     db.session.commit()
     flash('删除营销方案： “'+thisCampaign.description+'” 成功。')
     return redirect(url_for('admin.add_campaign'))

@@ -11,11 +11,7 @@ class AddUserForm(Form):
     password = PasswordField('密码', validators=[DataRequired(), EqualTo('password2', message='密码不匹配')])
     password2 = PasswordField('确认密码', validators=[DataRequired()])
     branchname = StringField('分店名', validators=[DataRequired()])
-    submit = SubmitField('确认添加')
-
-    def validate_username(self, field):
-        if User.query.filter_by(username=field.data).first():
-            raise ValidationError('用户已存在')
+    submit = SubmitField('确认')
 
 
 class PasswordResetForm(Form):

@@ -21,8 +21,14 @@ def after_request(response):
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    user_ip = request.remote_addr
-    return render_template('index.html', current_time=datetime.utcnow(), user_ip=user_ip)
+    if current_user.is_authenticated:
+        user = User.query.filter_by(id=current_user._get_current_object().id).first()
+        last_seen = user.last_seen
+        last_from_ip = user.last_from_ip
+    else:
+        last_from_ip = None
+        last_seen = None
+    return render_template('index.html', current_time=datetime.utcnow(), last_seen=last_seen, last_from_ip=last_from_ip)
 
 @main.route('/newcard', methods=['GET', 'POST'])
 @login_required

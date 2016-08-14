@@ -6,7 +6,7 @@
 {% block page_content %}
 <div class="container">
 <div class="page-header">
-    <h1>添加用户</h1>
+    <h1>管理用户</h1>
 </div>
 <div class="col-md-4">
     {{ wtf.quick_form(form) }}
@@ -27,6 +27,8 @@
         <th>用户名</th>
         <th>门店名</th>
         <th>添加时间</th>
+        <th>修改</th>
+        <th>删除</th>
     </tr>
     </thead>
     <tbody>
@@ -35,6 +37,15 @@
         <td>{{ user.username }}</td>
         <td>{{ user.branchname }}</td>
         <td>{{ moment(user.last_seen).format('YYYY年M月D日 HH:mm:ss') }}</td>
+        <td><form name="alteruser" action="{{ url_for('admin.alter_user', user_id=user.id)}}" method="get">
+                <input type="submit" value="修改" />
+            </form>
+        </td>
+        <td>
+            <form name="deleteuser" action="{{ url_for('admin.delete_user', user_id=user.id)}}" method="get">
+                <input type="submit" value="删除" />
+            </form>
+        </td>
     </tr>
     {% endfor %}
     </tbody>
