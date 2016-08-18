@@ -8,7 +8,7 @@
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='datepicker.css') }}">
-<link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap.min.css') }}">
 {% endblock %}
 
 {% block navbar %}
@@ -36,6 +36,7 @@
                 <li><a href="{{ url_for('admin.add_campaign') }}">营销方案</a> </li>
                 <li><a href="{{ url_for('admin.recordlookup') }}">综合查询</a></li>
                 <li><a href="{{ url_for('admin.password_reset') }}">修改密码</a></li>
+                <li><a href="{{ url_for('admin.cardreport') }}">卡报表</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -79,7 +80,7 @@
 <script src="{{ url_for('static', filename='LodopFuncs.js') }}"></script>
     <!-- HTML5 Shim 和 Respond.js 用于让 IE8 支持 HTML5元素和媒体查询 -->
       <!--[if lt IE 9]>
-         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-         <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+         <script src="{{ url_for('static', filename='html5shiv.js') }}"></script>
+         <script src="{{ url_for('static', filename='respond.min.js') }}"></script>
       <![endif]-->
 {% endblock %}

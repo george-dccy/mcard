@@ -52,6 +52,8 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
+    last_from_ip = db.Column(db.String(16))
+    active_flag = db.Column(db.Integer, default=1)
     recharges = db.relationship('Recharge', backref='changer', lazy='dynamic')
     consumes = db.relationship('Consume', backref='changer', lazy='dynamic')
     cards = db.relationship('Card', backref='owner', lazy='dynamic')
@@ -209,6 +211,7 @@ class Campaign(db.Model):
     description = db.Column(db.String(200), unique=True)
     consumer_pay = db.Column(db.Integer)
     into_card = db.Column(db.Integer)
+    active_flag = db.Column(db.Integer, default=1)
     recharges = db.relationship('Recharge', backref='campaigns', lazy='dynamic')
 
     @staticmethod

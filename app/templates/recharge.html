@@ -4,10 +4,49 @@
 {% block title %}充值{% endblock %}
 
 {% block page_content %}
+
+<div class="container">
+<div class="page-header">
+    <h1>会员卡充值</h1>
+</div>
+<div class="col-md-5">
+    {{ wtf.quick_form(form) }}
+</div>
+</div>
+
+<!--
+<div class="container">
 <div class="page-header">
     <h1>会员卡充值</h1>
 </div>
 <div class="col-md-4">
-    {{ wtf.quick_form(form) }}
+    <form class="form-group" method="post" action="{{ url_for('main.recharge') }}">
+        {{ form.hidden_tag() }}
+        {{ form.cardnumber.label }}{{ form.cardnumber }}
+        {{ form.campaign.label }}{{ form.campaign }}
+        {{ form.channel.label }}{{ form.channel }}
+        {{ form.consumer_pay.label }}{{ form.consumer_pay(placeholder="充值采用累计方式，请输入方案最小金额") }}
+        <input type="submit" value="确认">
+    </form>
 </div>
+</div>
+!-->
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+    function CheckIsInstall() {
+		try{
+            var LODOP=getLodop();
+            if (typeof (LODOP) == "undefined") throw "error";
+		 }catch(err){
+            if (err=="error") {
+                var btn = document.getElementById("submit");
+                btn.disabled=true;
+            }
+ 		 }
+	}
+    window.onload=CheckIsInstall;
+</script>
 {% endblock %}

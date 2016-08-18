@@ -11,11 +11,7 @@ class AddUserForm(Form):
     password = PasswordField('密码', validators=[DataRequired(), EqualTo('password2', message='密码不匹配')])
     password2 = PasswordField('确认密码', validators=[DataRequired()])
     branchname = StringField('分店名', validators=[DataRequired()])
-    submit = SubmitField('确认添加')
-
-    def validate_username(self, field):
-        if User.query.filter_by(username=field.data).first():
-            raise ValidationError('用户已存在')
+    submit = SubmitField('确认')
 
 
 class PasswordResetForm(Form):
@@ -52,6 +48,7 @@ class AlterCampaignForm(Form):
 class RecordLookupForm(Form):
     datefrom = DateField('开始日期', validators=[DataRequired()])
     dateto = DateField('结束日期', validators=[DataRequired()])
+    category = SelectField('类别', coerce=int, choices=[(1, '充值'), (2, '消费')])
     branchname = SelectField('门店', coerce=int)
     submit = SubmitField('查询')
 

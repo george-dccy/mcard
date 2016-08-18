@@ -7,7 +7,24 @@
 <div class="page-header">
     <h1>会员卡消费</h1>
 </div>
-<div class="col-md-4">
+<div class="col-md-5">
     {{ wtf.quick_form(form) }}
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+    function CheckIsInstall() {
+		try{
+		    var LODOP=getLodop();
+			if (LODOP.VERSION) {
+				};
+		 }catch(err){
+            var btn = document.getElementById("submit");
+            btn.disabled=true;
+ 		 }
+	};
+    window.onload=CheckIsInstall;
+</script>
 {% endblock %}

@@ -5,14 +5,15 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>查询结果</h1>
+    <h1>查询结果 >> <a href="{{ url_for('admin.printrecord', datefrom=datefrom, dateto=dateto, user_id=user_id, category=category) }}">下载</a></h1>
 </div>
 
 <div class="col-md-11">
 <table class="table table-hover">
-    <caption>查询{{ datefrom }}到{{ dateto }}在{{ branchname }}的充值记录</caption>
+    <caption>查询{{ datefrom }}到{{ dateto }}在{{ branchname }}的{{ category_name }}记录</caption>
     <thead>
     <tr>
+        {% if category_name == "充值" %}
         <th>流水号</th>
         <th>卡号</th>
         <th>支付方式</th>
@@ -20,11 +21,19 @@
         <th>入卡金额</th>
         <th>门店</th>
         <th>充值时间</th>
+        {% else %}
+        <th>流水号</th>
+        <th>卡号</th>
+        <th>消费金额</th>
+        <th>门店</th>
+        <th>消费时间</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
     {% for line in records %}
     <tr>
+        {% if category_name == "充值" %}
         <td>{% if line.sn %}{{ line.sn }}{% endif %}</td>
         <td>{{ line.cardnumber }}</td>
         <td>{% if line.channel == 1 %}现金{% elif line.channel == 2 %}刷卡{% endif %}</td>
@@ -32,6 +41,13 @@
         <td>{{ line.into_card }} 元</td>
         <td>{{ line.branchname }}</td>
         <td>{{ moment(line.change_time).format('YYYY-M-D HH:mm:ss') }}</td>
+        {% else %}
+        <td>{% if line.sn %}{{ line.sn }}{% endif %}</td>
+        <td>{{ line.cardnumber }}</td>
+        <td>{{ line.expense }} 元</td>
+        <td>{{ line.branchname }}</td>
+        <td>{{ moment(line.change_time).format('YYYY-M-D HH:mm:ss') }}</td>
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>

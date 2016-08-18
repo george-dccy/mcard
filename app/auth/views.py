@@ -5,6 +5,8 @@ from . import auth
 from .. import db
 from ..models import User
 from .forms import LoginForm
+from datetime import datetime
+from flask import jsonify
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -22,6 +24,14 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    user_id = current_user._get_current_object().id
+    from_ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    #from_ip = str(jsonify(origin=request.headers.get('X-Forwarded-For', request.remote_addr)))
+    user = User.query.filter_by(id=user_id).first()
+    user.last_seen = datetime.utcnow()
+    user.last_from_ip = from_ip
+    db.session.add(user)
+    db.session.commit()
     logout_user()
     flash('注销成功。')
     return redirect(url_for('main.index'))
