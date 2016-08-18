@@ -32,3 +32,21 @@
 </div>
 !-->
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+    function CheckIsInstall() {
+		try{
+            var LODOP=getLodop();
+            if (typeof (LODOP) == "undefined") throw "error";
+		 }catch(err){
+            if (err=="error") {
+                var btn = document.getElementById("submit");
+                btn.disabled=true;
+            }
+ 		 }
+	}
+    window.onload=CheckIsInstall;
+</script>
+{% endblock %}

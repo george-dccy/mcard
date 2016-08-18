@@ -11,3 +11,20 @@
     {{ wtf.quick_form(form) }}
 </div>
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+    function CheckIsInstall() {
+		try{
+		    var LODOP=getLodop();
+			if (LODOP.VERSION) {
+				};
+		 }catch(err){
+            var btn = document.getElementById("submit");
+            btn.disabled=true;
+ 		 }
+	};
+    window.onload=CheckIsInstall;
+</script>
+{% endblock %}
