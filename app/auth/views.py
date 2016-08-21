@@ -47,8 +47,10 @@ def reguser():
     if form.validate_on_submit():
         username = form.username.data
         reg_code = form.reg_code.data
+        reg_host = form.reg_host.data
         user = User.query.filter(User.username==username).filter(User.active_flag!=-1).first()
         if not user.is_reged() and user.reg(reg_code):
             flash('账户激活成功！')
             return redirect(url_for('auth.login'))
+    form.username.data = request.args.get['username', '']
     return render_template('auth/reguser.html', form=form)

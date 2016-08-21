@@ -53,7 +53,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
     last_from_ip = db.Column(db.String(16))
-    allowed_ip = db.Column(db.String(256))
+    allowed_host = db.Column(db.String(256))
     active_flag = db.Column(db.Integer, default=1)
     in_use = db.Column(db.Integer, default=0)
     reg_code = db.Column(db.String(64))
@@ -86,9 +86,10 @@ class User(UserMixin, db.Model):
         db.session.add(admin_user)
         db.session.commit()
 
-    def reg(self, reg_code):
+    def reg(self, reg_code, reg_host):
         if reg_code == self.reg_code:
             self.in_use = 1
+            self.allowed_host = self.allowed_host + ':' + str(reg_host)
             db.session.add(self)
             db.session.commit()
             return True
