@@ -45,16 +45,20 @@ def adduser():
 def alter_user(user_id):
     form = AddUserForm()
     thisuser = User.query.filter_by(id=user_id).one()
-    if form.validate_on_submit():
-        thisuser.username=form.username.data
-        thisuser.branchname=form.branchname.data
-        thisuser.password=form.password.data
-        db.session.add(thisuser)
-        db.session.commit()
-        flash('成功修改用户：'+thisuser.branchname)
-        return redirect(url_for('admin.adduser'))
     form.username.data=thisuser.username
     form.branchname.data=thisuser.branchname
+    if form.validate_on_submit():
+        if not thisuser.is_administrator:
+            thisuser.username=form.username.data
+            thisuser.branchname=form.branchname.data
+            thisuser.password=form.password.data
+            db.session.add(thisuser)
+            db.session.commit()
+            flash('成功修改用户：'+thisuser.branchname)
+            return redirect(url_for('admin.adduser'))
+        else:
+            flash('修改失败，请重试')
+            return redirect(url_for('admin.alter_user', user_id=user_id))
     return render_template('admin/adduser.html', form=form, allu=None)
 
 
@@ -62,6 +66,9 @@ def alter_user(user_id):
 @admin_required
 def delete_user(user_id):
     thisuser = User.query.filter_by(id=user_id).one()
+    if thisuser.is_administrator():
+        flash('不可删除管理员用户。')
+        return redirect(url_for('admin.adduser'))
     username = thisuser.branchname
     thisuser.active_flag = -1
     db.session.add(thisuser)
