@@ -53,7 +53,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
     last_from_ip = db.Column(db.String(16))
+    allowed_ip = db.Column(db.String(256))
     active_flag = db.Column(db.Integer, default=1)
+    in_use = db.Column(db.Integer, default=0)
+    reg_code = db.Column(db.String(64))
     recharges = db.relationship('Recharge', backref='changer', lazy='dynamic')
     consumes = db.relationship('Consume', backref='changer', lazy='dynamic')
     cards = db.relationship('Card', backref='owner', lazy='dynamic')
@@ -82,6 +85,21 @@ class User(UserMixin, db.Model):
         admin_user = User(username='admin', password='root', branchname='head')
         db.session.add(admin_user)
         db.session.commit()
+
+    def reg(self, reg_code):
+        if reg_code == self.reg_code:
+            self.in_use = 1
+            db.session.add(self)
+            db.session.commit()
+            return True
+        else:
+            return False
+
+    def is_reged(self):
+        if self.in_use == 1:
+            return True
+        else:
+            return False
 
     def can(self, permissions):
         return self.role is not None and \
