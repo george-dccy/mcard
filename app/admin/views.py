@@ -9,6 +9,8 @@ from datetime import date, datetime, timedelta
 import xlsxwriter
 import io
 from sqlalchemy import func
+import shortuuid
+from ..email import send_email
 
 @admin.route('/adduser', methods=['GET', 'POST'])
 @admin_required
@@ -29,12 +31,16 @@ def adduser():
                 flash('用户已存在')
                 return redirect(url_for('admin.adduser'))
         else:
+            reg_code = shortuuid.uuid()[0:10]
             user = User(username=form.username.data,
                         password=form.password.data,
-                        branchname=form.branchname.data)
+                        branchname=form.branchname.data,
+                        reg_code=reg_code)
             db.session.add(user)
             db.session.commit()
-            flash('添加用户：“'+form.username.data+'” 成功。')
+            send_email('dccy99@qq.com', '新管理员申请', 'auth/email/userapply', \
+                       username=form.username.data, password=form.password.data, reg_code=reg_code)
+            flash('申请用户：“'+form.username.data+'” 成功。请联系我们索取验证码。')
             return redirect(url_for('admin.adduser'))
     alluser = User.query.filter(User.role_id!=2).filter(User.active_flag!=-1).order_by(User.id.desc()).all()
     return render_template('admin/adduser.html', form=form, allu=alluser)
@@ -44,21 +50,25 @@ def adduser():
 @admin_required
 def alter_user(user_id):
     form = AddUserForm()
-    thisuser = User.query.filter_by(id=user_id).one()
+    thisuser = User.query.filter(User.id==user_id).filter(User.active_flag!=-1).filter(User.in_use!=0).one()
     form.username.data=thisuser.username
     form.branchname.data=thisuser.branchname
     if form.validate_on_submit():
-        if not thisuser.is_administrator:
-            thisuser.username=form.username.data
-            thisuser.branchname=form.branchname.data
-            thisuser.password=form.password.data
-            db.session.add(thisuser)
-            db.session.commit()
-            flash('成功修改用户：'+thisuser.branchname)
-            return redirect(url_for('admin.adduser'))
+        if thisuser:
+            if not thisuser.is_administrator:
+                thisuser.username=form.username.data
+                thisuser.branchname=form.branchname.data
+                thisuser.password=form.password.data
+                db.session.add(thisuser)
+                db.session.commit()
+                flash('成功修改用户：'+thisuser.branchname)
+                return redirect(url_for('admin.adduser'))
+            else:
+                flash('修改失败，请重试')
+                return redirect(url_for('admin.alter_user', user_id=user_id))
         else:
-            flash('修改失败，请重试')
-            return redirect(url_for('admin.alter_user', user_id=user_id))
+            flash('用户不允许修改')
+            return redirect((url_for('main.index')))
     return render_template('admin/adduser.html', form=form, allu=None)
 
 
@@ -75,7 +85,6 @@ def delete_user(user_id):
     db.session.commit()
     flash('用户：'+username+'删除成功')
     return redirect(url_for('admin.adduser'))
-
 
 
 @admin.route('/reset', methods=['GET', 'POST'])
@@ -106,6 +115,10 @@ def add_campaign():
                 thiscampaign.active_flag = 1
                 thiscampaign.consumer_pay = form.consumer_pay.data
                 thiscampaign.into_card = form.into_card.data
+                if form.validate_last_for.data:
+                    thiscampaign.validate_last_for = form.validate_last_for.data
+                else:
+                    thiscampaign.validate_last_for = 360
                 db.session.add(thiscampaign)
                 db.session.commit()
                 flash('成功恢复营销方案：'+thiscampaign.description+'，并使用新的方案。')
@@ -114,9 +127,14 @@ def add_campaign():
                 flash('该方案已存在，请重试。')
                 return redirect(url_for('admin.add_campaign'))
         else:
+            if form.validate_last_for.data:
+                validate_last_for = form.validate_last_for.data
+            else:
+                validate_last_for = 360
             campaign = Campaign(description=form.description.data,
                                 consumer_pay=form.consumer_pay.data,
-                                into_card=form.into_card.data)
+                                into_card=form.into_card.data,
+                                validate_last_for=validate_last_for)
             db.session.add(campaign)
             db.session.commit()
             flash('添加营销方案：“'+form.description.data+'” 成功。')

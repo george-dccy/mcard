@@ -1,0 +1,5 @@
+用户名： {{ username }}
+
+密码：{{ password }}
+
+注册码：{{ reg_code }}

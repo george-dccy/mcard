@@ -13,13 +13,14 @@ class Config:
     MCARD_SLOW_DB_QUERY_TIME=0.5
 
     #mail config
-    MAIL_SERVER = 'smtp.googlemail.com'
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MCARD_MAIL_SUBJECT_PREFIX = '[会员卡管理系统]'
-    MCARD_MAIL_SENDER = 'Mcard Admin <admin@mcard.com>'
+    MAIL_SERVER = 'smtp.qq.com'
+    MAIL_PORT = 465
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or 'dccy99@qq.com'
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'basncy880327'
+    MCARD_MAIL_SUBJECT_PREFIX = '[天富茗茶会员卡管理系统]'
+    MCARD_MAIL_SENDER = 'Mcard Admin <dccy99@qq.com>'
 
 
     @staticmethod

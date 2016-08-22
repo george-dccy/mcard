@@ -32,6 +32,7 @@ class AddCampaignForm(Form):
                                                   NumberRange(min=0, max=None, message='充值金额不能小于0')])
     into_card = FloatField('入卡金额', validators=[DataRequired(),
                                                   NumberRange(min=0, max=None, message='充值金额不能小于0')])
+    validate_last_for = IntegerField('有效期(单位:天)', validators=[NumberRange(min=1, max=None, message='有效期不能小于1天')])
     submit = SubmitField('确认')
 
 
@@ -41,8 +42,8 @@ class AlterCampaignForm(Form):
                                                   NumberRange(min=0, max=None, message='充值金额不能小于0')])
     into_card = FloatField('入卡金额', validators=[DataRequired(),
                                                   NumberRange(min=0, max=None, message='充值金额不能小于0')])
+    validate_last_for = IntegerField('有效期(单位:天)', validators=[NumberRange(min=1, max=None, message='有效期不能小于1天')])
     submit = SubmitField('确认')
-
 
 
 class RecordLookupForm(Form):

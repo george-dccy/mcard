@@ -10,6 +10,37 @@
 <div class="col-md-4">
     {{ wtf.quick_form(form) }}
     <br>
+<!--
     <p>忘记密码？ <a href="{{ url_for('admin.password_reset') }}">重置密码</a></p>
+!-->
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+    function HostInfo(){
+        lsitem = 'hostinfo_' + document.getElementById("username").value;
+        try{
+            input = document.getElementById("hide_host");
+            input.value = localStorage.getItem(lsitem);
+        }catch (err){
+            var btn = document.getElementById("submit");
+            btn.disabled=true;
+            alert("出错了！请重试。")
+        }
+    }
+
+    //document.getElementById('submit').addEventListener('click', function() {
+    //    document.getElementById('hide_host').value = guid();
+    //    });
+
+    document.getElementById('submit').addEventListener('click', HostInfo);
+
+    function hide_host_input(){
+        input = document.getElementById("hide_host");
+        input.parentElement.style.display = "none";
+    }
+    window.onload=hide_host_input;
+</script>
 {% endblock %}

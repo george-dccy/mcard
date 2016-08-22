@@ -12,3 +12,43 @@
     <br>
 </div>
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+    function HostInfo(){
+        lsitem = 'hostinfo_' + document.getElementById("username").value;
+        try{
+            input = document.getElementById("hide_host");
+            if (localStorage.getItem(lsitem)) {
+                input.value = 'regged';
+            }else{
+                localStorage.setItem(lsitem, guid());
+                input.value = localStorage.getItem(lsitem);
+            }
+        }catch (err){
+            var btn = document.getElementById("submit");
+            btn.disabled=true;
+            alert("出错了！请重试。")
+        }
+    }
+
+    //document.getElementById('submit').addEventListener('click', function() {
+    //    document.getElementById('hide_host').value = guid();
+    //    });
+
+    document.getElementById('submit').addEventListener('click', HostInfo);
+
+    function guid() {
+        function S4() {
+           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        }
+        return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+}
+    function hide_host_input(){
+        input = document.getElementById("hide_host");
+        input.parentElement.style.display = "none";
+    }
+    window.onload=hide_host_input;
+</script>
+{% endblock %}

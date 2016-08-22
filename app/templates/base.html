@@ -50,7 +50,17 @@
                     </ul>
                 </li>
                 {% else %}
-                <li><a href="{{ url_for('auth.login') }}">登录</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        用户操作<b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('auth.login') }}">登录</a></li>
+                        <li><a href="{{ url_for('auth.reguser') }}" >用户激活</a></li>
+                        <li><a href="{{ url_for('auth.apply') }}" >管理员申请</a></li>
+                    </ul>
+                </li>
+
                 {% endif %}
             </ul>
         </div>
@@ -83,4 +93,5 @@
          <script src="{{ url_for('static', filename='html5shiv.js') }}"></script>
          <script src="{{ url_for('static', filename='respond.min.js') }}"></script>
       <![endif]-->
+
 {% endblock %}
