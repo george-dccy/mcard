@@ -183,6 +183,13 @@ class Card(db.Model):
     validate_last_for = db.Column(db.Integer, default=360)
     #到期时间
     validate_until = db.Column(db.DateTime)
+    #激活方式
+    validate_channel = db.Column(db.Integer, default=1)
+    #激活支付金额
+    validate_consumer_pay = db.Column(db.Float)
+    validate_into_card = db.Column(db.Float)
+    #激活流水号
+    validate_sn = db.Column(db.String(21))
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     recharges = db.relationship('Recharge', backref='cards', lazy='dynamic')
     consumes = db.relationship('Consume', backref='cards', lazy='dynamic')
@@ -190,6 +197,8 @@ class Card(db.Model):
     def __init__(self, **kwargs):
         super(Card, self).__init__(**kwargs)
         self.validate_until = self.validate_start_time + timedelta(days=self.validate_last_for)
+
+        #初始化时生成sn
 
 
 class Recharge(db.Model):
@@ -272,6 +281,7 @@ class Campaign(db.Model):
     into_card = db.Column(db.Integer)
     validate_last_for = db.Column(db.Integer, default=360)
     active_flag = db.Column(db.Integer, default=1)
+    priority = db.Column(db.Integer, default=0)
     recharges = db.relationship('Recharge', backref='campaigns', lazy='dynamic')
 
     @staticmethod

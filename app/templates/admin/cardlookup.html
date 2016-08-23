@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}卡查询--管理员{% endblock %}
+
+{% block page_content %}
+<div class="container">
+<div class="page-header">
+    <h1>会员卡查询</h1>
+</div>
+<div class="col-md-5">
+    {{ wtf.quick_form(form) }}
+</div>
+</div>
+
+{% endblock %}
+

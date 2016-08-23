@@ -2,7 +2,7 @@ from flask.ext.wtf import Form
 from wtforms import StringField, PasswordField, SubmitField, FloatField, IntegerField, DateField, SelectField
 from wtforms.validators import Length, Email, Regexp, EqualTo, DataRequired, NumberRange
 from wtforms import ValidationError
-from ..models import User
+from ..models import User, Campaign, Card
 
 class AddUserForm(Form):
     username = StringField('用户名', validators=[
@@ -46,10 +46,25 @@ class AlterCampaignForm(Form):
     submit = SubmitField('确认')
 
 
+class CardInitForm(Form):
+    cardnumber = StringField('卡号', validators=[DataRequired(), Length(1, 20, message='卡号长度错误')])
+    campaign = SelectField('营销方案', coerce=int)
+    submit = SubmitField('确定')
+
+    def __init__(self, *args, **kwargs):
+        super(CardInitForm, self).__init__(*args, **kwargs)
+        self.campaign.choices = [(campaign.id, campaign.description)
+                                  for campaign in Campaign.query.order_by(Campaign.priority.desc()).all()]
+
+    def validate_campaign(self, field):
+        if field.data is None:
+            raise ValidationError('请联系管理员制订营销方案')
+
+
 class RecordLookupForm(Form):
     datefrom = DateField('开始日期', validators=[DataRequired()])
     dateto = DateField('结束日期', validators=[DataRequired()])
-    category = SelectField('类别', coerce=int, choices=[(1, '充值'), (2, '消费')])
+    category = SelectField('类别', coerce=int, choices=[(1, '激活'), (2, '消费')])
     branchname = SelectField('门店', coerce=int)
     submit = SubmitField('查询')
 

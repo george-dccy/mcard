@@ -11,3 +11,32 @@
     {{ wtf.quick_form(form) }}
 </div>
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+    $(function(){
+        var SCRIPT_ROOT = {{request.script_root|tojson|safe}};
+        $('input[name="cardnumber"]').bind('change', function(){
+            $.getJSON(SCRIPT_ROOT + '/newcard_remaining',{
+                cardnumber: $('input[name="cardnumber"]').val()
+            },
+            function(data){
+                $('input[name="remaining"]').val(data.result);
+            }
+            );
+        })
+    });
+    function CheckIsInstall() {
+		try{
+		    var LODOP=getLodop();
+			if (LODOP.VERSION) {
+				};
+		 }catch(err){
+            var btn = document.getElementById("submit");
+            btn.disabled=true;
+ 		 }
+	};
+    window.onload=CheckIsInstall;
+</script>
+{% endblock %}

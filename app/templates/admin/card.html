@@ -1,75 +1,43 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}会员卡详细信息{% endblock %}
+{% block title %}卡查询--管理员{% endblock %}
 
 {% block page_content %}
+
+{% if thiscard %}
 <div class="container">
 <div class="page-header">
     <h1>会员卡信息</h1>
 </div>
-<div class="col-md-7">
+<div class="col-md-11">
     <table class="table table-hover">
-        <caption>基础信息</caption>
+        <caption>会员卡信息</caption>
         <thead>
             <tr>
                 <th>会员卡号</th>
-                <th>开卡门店</th>
+                <th>卡片归属</th>
                 <th>卡内余额</th>
-                <th>有效期</th>
+                <th>卡状态</th>
+                <th>激活日期</th>
+                <th>有效期至</th>
+                <th>操作</th>
             </tr>
         </thead>
         <tbody>
         <tr>
             <td>{{ thiscard.cardnumber }}</td>
-            <td>{{ owner }}</td>
+            <td>{% if thiscard.in_use == 1 %}{{ owner }}{% else %}无{% endif %}</td>
             <td>{{ thiscard.remaining }}</td>
-            <td>{{ moment(thiscard.validate_until).format('YYYY-M-D HH:mm:ss') }}</td>
+            <td>{% if thiscard.in_use == 1 %}已激活{% else %}未激活{% endif %}</td>
+            <td>{% if thiscard.in_use == 1 %}{{ thiscard.validate_start_time }}{% else %}无{% endif %}</td>
+            <td>{% if thiscard.in_use == 1 %}{{ thiscard.validate_until }}{% else %}无{% endif %}</td>
+            <td><a href="{{ url_for('admin.delect_card', card_id=thiscard.id) }}">注销</a></td>
         </tr>
         </tbody>
     </table>
 </div>
 </div>
-
-{% if lastrecharge %}
-<div class="container">
-<div class="page-header">
-    <h1>充值</h1>
-</div>
-
-<div class="col-md-11">
-<table class="table table-hover">
-    <caption>本店最近一次充值</caption>
-    <thead>
-    <tr>
-        <th>流水号</th>
-        <th>卡号</th>
-        <th>支付方式</th>
-        <th>支付金额</th>
-        <th>入卡金额</th>
-        <th>门店</th>
-        <th>充值时间</th>
-        <th>凭证</th>
-    </tr>
-    </thead>
-    <tbody>
-
-    <tr>
-        <td id="re1">{% if lastrecharge[0].sn %}{{ lastrecharge[0].sn }}{% endif %}</td>
-        <td id="re2">{{ lastrecharge[0].cardnumber }}</td>
-        <td id="re3">{% if lastrecharge[0].channel == 1 %}现金{% elif lastrecharge[0].channel == 2 %}刷卡{% endif %}</td>
-        <td id="re4">{{ lastrecharge[0].consumer_pay }} 元</td>
-        <td id="re5">{{ lastrecharge[0].into_card }} 元</td>
-        <td id="re6">{{ lastrecharge[0].branchname }}</td>
-        <td id="re7">{{ moment(lastrecharge[0].change_time).format('YYYY-M-D HH:mm:ss') }}</td>
-        <td><a href="javascript:RechargePreview()">打印</a></td>
-    </tr>
-
-    </tbody>
-</table>
-</div>
-</div>
-{% endif %}
 
 {% if lastconsume %}
 <div class="container">
@@ -106,6 +74,7 @@
 </div>
 </div>
 {% endif %}
+{% endif %}
 
 {% endblock %}
 
@@ -113,14 +82,6 @@
 {{ super() }}
 <script language="javascript" type="text/javascript">
         var LODOP; //声明为全局变量
-	function RechargePrint() {
-		CreateRechargePrintPage();
-		LODOP.PRINT();
-	};
-	function RechargePreview() {
-		CreateRechargePrintPage();
-		LODOP.PREVIEW();
-	};
     function ConsumePrint() {
 		CreateConsumePrintPage();
 		LODOP.PRINT();
@@ -152,20 +113,7 @@
 		LODOP.SET_PRINT_STYLEA(6,"Bold",1);
 		LODOP.ADD_PRINT_LINE(70,10,70,290,0,2);
 	};
-	function CreateRechargePrintPage() {
-		AddTitle();
-        LODOP.SET_PRINT_PAGESIZE(3,800,50,""); //设定纸张大小
-		LODOP.SET_PRINT_STYLE("FontSize",10);
-		LODOP.ADD_PRINT_TEXT(42,120,100,25,"充值凭证");
-		LODOP.SET_PRINT_STYLEA(8,"FontName","楷书");
-		LODOP.SET_PRINT_STYLEA(8,"FontSize",13);
-		LODOP.ADD_PRINT_TEXT(90,85,300,20,document.getElementById("re1").innerText);
-		LODOP.ADD_PRINT_TEXT(120,85,300,20,document.getElementById("re2").innerText);
-		LODOP.ADD_PRINT_TEXT(150,85,300,20,document.getElementById("re6").innerText);
-		LODOP.ADD_PRINT_TEXT(180,85,300,20,document.getElementById("re7").innerText);
-        LODOP.ADD_PRINT_TEXT(210,85,300,20,document.getElementById("re5").innerText);
-        LODOP.ADD_PRINT_BARCODE(250,100,128,128,"QRCode",document.getElementById("re1").innerText);
-	};
+
     function CreateConsumePrintPage() {
 		AddTitle();
         LODOP.SET_PRINT_PAGESIZE(3,800,50,""); //设定纸张大小
