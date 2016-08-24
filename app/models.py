@@ -83,8 +83,10 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def insert_admin():
-        admin_user = User(username='admin', password='root', branchname='head')
-        db.session.add(admin_user)
+        admin_user1 = User(username='admin', password='root', branchname='head')
+        admin_user2 = User(username='admin2', password='root', branchname='head2')
+        admin_user2.role = Role.query.filter_by(permissions=0xff).first()
+        db.session.add(admin_user1, admin_user2)
         db.session.commit()
 
     def reg(self, reg_code, reg_host):
@@ -178,13 +180,13 @@ class Card(db.Model):
     #是否已激活，默认为0，不激活状态，激活为1
     in_use = db.Column(db.Integer, default=0)
     #激活时间
-    validate_start_time = db.Column(db.DateTime, default=datetime.utcnow)
+    validate_start_time = db.Column(db.DateTime)
     #有效期时长，以天数为单位
     validate_last_for = db.Column(db.Integer, default=360)
     #到期时间
     validate_until = db.Column(db.DateTime)
     #激活方式
-    validate_channel = db.Column(db.Integer, default=1)
+    validate_channel = db.Column(db.Integer)
     #激活支付金额
     validate_consumer_pay = db.Column(db.Float)
     validate_into_card = db.Column(db.Float)
@@ -194,11 +196,15 @@ class Card(db.Model):
     recharges = db.relationship('Recharge', backref='cards', lazy='dynamic')
     consumes = db.relationship('Consume', backref='cards', lazy='dynamic')
 
-    def __init__(self, **kwargs):
-        super(Card, self).__init__(**kwargs)
-        self.validate_until = self.validate_start_time + timedelta(days=self.validate_last_for)
+    #def __init__(self, **kwargs):
+    #    super(Card, self).__init__(**kwargs)
+    #    self.validate_until = self.validate_start_time + timedelta(days=self.validate_last_for)
 
-        #初始化时生成sn
+    def is_out_of_date(self, date):
+        if self.in_use and datetime(date).date() > datetime(self.validate_until).date():
+            return True
+        else:
+            return False
 
 
 class Recharge(db.Model):

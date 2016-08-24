@@ -30,8 +30,8 @@
             <td>{% if thiscard.in_use == 1 %}{{ owner }}{% else %}无{% endif %}</td>
             <td>{{ thiscard.remaining }}</td>
             <td>{% if thiscard.in_use == 1 %}已激活{% else %}未激活{% endif %}</td>
-            <td>{% if thiscard.in_use == 1 %}{{ thiscard.validate_start_time }}{% else %}无{% endif %}</td>
-            <td>{% if thiscard.in_use == 1 %}{{ thiscard.validate_until }}{% else %}无{% endif %}</td>
+            <td>{% if thiscard.in_use == 1 %}{{ moment(thiscard.validate_start_time).format('YYYY-M-D') }}{% else %}无{% endif %}</td>
+            <td>{% if thiscard.in_use == 1 %}{{ moment(thiscard.validate_until).format('YYYY-M-D') }}{% else %}无{% endif %}</td>
             <td><a href="{{ url_for('admin.delect_card', card_id=thiscard.id) }}">注销</a></td>
         </tr>
         </tbody>

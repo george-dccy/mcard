@@ -13,14 +13,14 @@
     <caption>查询{{ datefrom }}到{{ dateto }}在{{ branchname }}的{{ category_name }}记录</caption>
     <thead>
     <tr>
-        {% if category_name == "充值" %}
+        {% if category_name == "激活" %}
         <th>流水号</th>
         <th>卡号</th>
         <th>支付方式</th>
         <th>支付金额</th>
         <th>入卡金额</th>
         <th>门店</th>
-        <th>充值时间</th>
+        <th>激活时间</th>
         {% else %}
         <th>流水号</th>
         <th>卡号</th>
@@ -33,14 +33,14 @@
     <tbody>
     {% for line in records %}
     <tr>
-        {% if category_name == "充值" %}
-        <td>{% if line.sn %}{{ line.sn }}{% endif %}</td>
+        {% if category_name == "激活" %}
+        <td>{% if line.validate_sn %}{{ line.validate_sn }}{% endif %}</td>
         <td>{{ line.cardnumber }}</td>
-        <td>{% if line.channel == 1 %}现金{% elif line.channel == 2 %}刷卡{% endif %}</td>
-        <td>{{ line.consumer_pay }} 元</td>
-        <td>{{ line.into_card }} 元</td>
+        <td>{% if line.validate_channel == 1 %}现金{% elif line.validate_channel == 2 %}刷卡{% endif %}</td>
+        <td>{{ line.validate_consumer_pay }} 元</td>
+        <td>{{ line.validate_into_card }} 元</td>
         <td>{{ line.branchname }}</td>
-        <td>{{ moment(line.change_time).format('YYYY-M-D HH:mm:ss') }}</td>
+        <td>{{ moment(line.validate_start_time).format('YYYY-M-D HH:mm:ss') }}</td>
         {% else %}
         <td>{% if line.sn %}{{ line.sn }}{% endif %}</td>
         <td>{{ line.cardnumber }}</td>

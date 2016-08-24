@@ -14,7 +14,7 @@
 
 {% block scripts %}
 {{ super() }}
-<script type="text/javascript">
+<script language="javascript" type="text/javascript">
     $(function(){
         var SCRIPT_ROOT = {{request.script_root|tojson|safe}};
         $('input[name="cardnumber"]').bind('change', function(){
@@ -37,6 +37,9 @@
             btn.disabled=true;
  		 }
 	};
+    $(document).ready(function(){
+        $("#cardnumber").focus();
+    });
     window.onload=CheckIsInstall;
 </script>
 {% endblock %}

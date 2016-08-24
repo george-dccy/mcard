@@ -55,12 +55,12 @@ def reguser():
         username = form.username.data
         reg_code = form.reg_code.data
         reg_host = form.reg_host.data
-        user = User.query.filter(User.username==username).filter(User.active_flag!=-1).first()
-        if reg_host != 'regged' and reg_host and user.reg(reg_code, reg_host):
+        user = User.query.filter(User.username==username).filter(User.active_flag!=-1).filter(User.in_use!=1).first()
+        if reg_host and user.reg(reg_code, reg_host):
             flash('账户激活成功！')
             return redirect(url_for('auth.login'))
         else:
-            flash('激活失败，请联系管理员。')
+            flash('激活失败，请重试。')
             return redirect(url_for('auth.reguser', username=username))
     form.username.data = request.args.get('username', '')
     return render_template('auth/reguser.html', form=form)
@@ -68,11 +68,11 @@ def reguser():
 
 @auth.route('/apply', methods=['GET'])
 def apply():
-    admin = User.query.filter_by(username='admin').first()
-    if admin and admin.in_use != 1:
+    admin = User.query.filter(User.role_id==2).filter(User.in_use!=1).first()
+    if admin and not admin.reg_code:
         #password = shortuuid.uuid()[0:6]
         #admin.password = password
-        #admin.password = 'root'
+        admin.password = 'root'
         reg_code = shortuuid.uuid()[0:10]
         admin.reg_code = reg_code
         db.session.add(admin)

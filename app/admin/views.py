@@ -211,7 +211,7 @@ def cardinit():
         cardnumber = form.cardnumber.data
         thiscard = Card.query.filter_by(cardnumber=cardnumber).first()
         if thiscard:
-            flash('卡号为'+cardnumber+'的卡已存在，请进入查询：'+url_for('admin.cardlookup', card_id=thiscard.id))
+            flash('卡号为'+cardnumber+'的卡已存在，请进入卡管理-->卡查询。')
             return redirect(url_for('admin.cardinit'))
         else:
             campaign_id = form.campaign.data
@@ -305,10 +305,9 @@ def record():
         branchname = "全部门店"
         if category == 1:
             category_name = "激活"
-            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
-                                       Recharge.consumer_pay,Recharge.channel).\
-                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
-                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
+            records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
+                                       Card.validate_consumer_pay,Card.validate_channel)\
+                .filter(Card.owner_id==User.id).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
         else:
             category_name = "消费"
             records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
@@ -319,10 +318,9 @@ def record():
         branchname = user.branchname
         if category == 1:
             category_name = "激活"
-            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
-                                       Recharge.consumer_pay,Recharge.channel).\
-                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(User.id==user_id).\
-                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
+            records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
+                                       Card.validate_consumer_pay,Card.validate_channel).filter(User.id==user_id)\
+                .filter(Card.owner_id==User.id).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
         else:
             category_name = "消费"
             records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
@@ -340,9 +338,11 @@ def cardreport():
     workbook = xlsxwriter.Workbook(output, {'in_memory': True})
     worksheet = workbook.add_worksheet()
 
-    cards = db.session.query(Card.cardnumber.label('c'), User.branchname.label('b'), Card.remaining.label('r')).\
+    cards = db.session.query(Card.cardnumber, User.branchname, Card.remaining, Card.in_use, Card.validate_start_time, \
+                             Card.validate_channel, Card.validate_until, Card.validate_consumer_pay).\
         filter(Card.owner_id==User.id).order_by(Card.id).all()
     total = db.session.query(func.sum(Card.remaining))
+    total_consumer_pay = db.session.query(func.sum(Card.validate_consumer_pay)).filter(Card.in_use==1)
 
     bold = workbook.add_format({'bold': True})
     money = workbook.add_format({'num_format': '#,##0'})
@@ -353,25 +353,51 @@ def cardreport():
         'font_size': 14,
     })
 
-    worksheet.merge_range('A1:C1', '所有会员卡列表', merge_format)
+    worksheet.merge_range('A1:H1', '所有会员卡列表', merge_format)
     worksheet.set_row(0,height=30)
     worksheet.set_column(0,0,width=25)
     worksheet.set_column(1,1,width=15)
-    worksheet.set_column(2,2,width=20)
+    worksheet.set_column(2,2,width=15)
+    worksheet.set_column(3,3,width=10)
+    worksheet.set_column(4,4,width=21)
+    worksheet.set_column(5,5,width=10)
+    worksheet.set_column(6,6,width=15)
+    worksheet.set_column(7,7,width=16)
 
     worksheet.write(1, 0, '卡号', bold)
     worksheet.write(1, 1, '开卡门店名', bold)
     worksheet.write(1, 2, '卡内余额(元)', bold)
+    worksheet.write(1, 3, '状态', bold)
+    worksheet.write(1, 4, '激活时间', bold)
+    worksheet.write(1, 5, '激活方式', bold)
+    worksheet.write(1, 6, '付款金额', bold)
+    worksheet.write(1, 7, '有效期至', bold)
 
     row = 2
     col = 0
     for onecard in cards:
-        worksheet.write(row, col, onecard.c)
-        worksheet.write(row, col+1, onecard.b)
-        worksheet.write(row, col+2, onecard.r, money)
+        worksheet.write(row, col, onecard.cardnumber)
+        worksheet.write(row, col+1, onecard.branchname)
+        worksheet.write(row, col+2, onecard.remaining, money)
+        if onecard.in_use == 1:
+            if datetime.now().date() > onecard.validate_until.date():
+                worksheet.write(row, col+3, '已过期')
+            else:
+                worksheet.write(row, col+3, '已激活')
+            if onecard.validate_channel == 1:
+                worksheet.write(row, col+5, '现金')
+            else:
+                worksheet.write(row, col+5, '刷卡')
+            worksheet.write(row, col+4, (onecard.validate_start_time+timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S'))
+            worksheet.write(row, col+6, onecard.validate_consumer_pay, money)
+            worksheet.write(row, col+7, (onecard.validate_until+timedelta(hours=8)).strftime('%Y-%m-%d'))
+        else:
+            worksheet.write(row, col+3, '未激活')
+
         row += 1
-    worksheet.write(row+1, col, '余额总计', bold)
+    worksheet.write(row+1, col, '总计', bold)
     worksheet.write(row+1, col+2, total[0][0], money)
+    worksheet.write(row+1, col+6, total_consumer_pay[0][0], money)
     workbook.close()
     output.seek(0)
     filename = 'cardReport' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
@@ -405,26 +431,22 @@ def printrecord():
     })
 
     if category == 1:
-        category_name = "充值"
+        category_name = "激活"
         if user_id == 0:
             branchname = "全部门店"
-            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
-                                       Recharge.consumer_pay,Recharge.channel).\
-                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
-                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
-            total = db.session.query(func.sum(Recharge.consumer_pay)).\
-                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).\
-                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2)
+            records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
+                                       Card.validate_consumer_pay,Card.validate_channel).filter(Card.owner_id==User.id).\
+                filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
+            total = db.session.query(func.sum(Card.validate_consumer_pay)).filter(Card.in_use==1).\
+                filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2)
         else:
             user = User.query.filter_by(id=user_id).one()
             branchname = user.branchname
-            records = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
-                                       Recharge.consumer_pay,Recharge.channel).\
-                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(User.id==user_id).\
-                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2).all()
-            total = db.session.query(func.sum(Recharge.consumer_pay)).\
-                filter(Recharge.card_id==Card.id).filter(Recharge.changer_id==User.id).filter(User.id==user_id).\
-                filter(Recharge.change_time>=datefrom2).filter(Recharge.change_time<=dateto2)
+            records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
+                                       Card.validate_consumer_pay,Card.validate_channel).filter(Card.owner_id==User.id).filter(User.id==user_id).\
+                filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
+            total = db.session.query(func.sum(Card.validate_consumer_pay)).filter(Card.in_use==1).filter(User.id==user_id).\
+                filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2)
 
         worksheet.set_column(5, 5, width=15)
         worksheet.set_column(6, 6, width=20)
@@ -436,21 +458,21 @@ def printrecord():
         worksheet.write(1, 3, '支付金额', bold)
         worksheet.write(1, 4, '入卡金额', bold)
         worksheet.write(1, 5, '门店', bold)
-        worksheet.write(1, 6, '充值时间', bold)
+        worksheet.write(1, 6, '激活时间', bold)
 
         row = 2
         col = 0
         for onerecord in records:
-            worksheet.write(row, col, onerecord.sn)
+            worksheet.write(row, col, onerecord.validate_sn)
             worksheet.write(row, col+1, onerecord.cardnumber)
-            if onerecord.channel == 1:
+            if onerecord.validate_channel == 1:
                 worksheet.write(row, col+2, "现金")
             else:
                 worksheet.write(row, col+2, "刷卡")
-            worksheet.write(row, col+3, onerecord.consumer_pay, money)
-            worksheet.write(row, col+4, onerecord.into_card, money)
+            worksheet.write(row, col+3, onerecord.validate_consumer_pay, money)
+            worksheet.write(row, col+4, onerecord.validate_into_card, money)
             worksheet.write(row, col+5, onerecord.branchname)
-            worksheet.write(row, col+6, (onerecord.change_time+timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S'))
+            worksheet.write(row, col+6, (onerecord.validate_start_time+timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S'))
             row += 1
         worksheet.write(row+1, col, '充值总计', bold)
         worksheet.write(row+1, col+3, total[0][0], money)

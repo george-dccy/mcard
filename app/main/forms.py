@@ -64,7 +64,7 @@ class ConsumeForm(Form):
 
 class CardLookupForm(Form):
     cardnumber = StringField('卡号', validators=[DataRequired(), Length(1, 20, message='卡号长度错误')])
-    submit = SubmitField('余额查询')
+    submit = SubmitField('查询')
 
     def validate_cardnumber(self, field):
         if Card.query.filter_by(cardnumber=field.data).first() is None:
