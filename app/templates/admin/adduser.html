@@ -46,7 +46,10 @@
             {% endif %}
         </td>
         <td>
-            <form name="deleteuser" action="{{ url_for('admin.delete_user', user_id=user.id)}}" method="get">
+            <form name="deleteuser" action="
+            {% if user.in_use == 1 %}{{ url_for('admin.delete_user', user_id=user.id)}}
+            {% elif user.in_use != 1 %}{{ url_for('admin.delete_user_complete', user_id=user.id)}}{% endif %}
+            " method="get">
                 <input type="submit" value="删除" />
             </form>
         </td>

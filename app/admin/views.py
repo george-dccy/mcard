@@ -40,7 +40,7 @@ def adduser():
                         reg_code=reg_code)
             db.session.add(user)
             db.session.commit()
-            send_email('dccy99@qq.com', '新管理员申请', 'auth/email/userapply', \
+            send_email('dccy99@qq.com', '新用户申请', 'auth/email/userapply', \
                        username=form.username.data, password=form.password.data, reg_code=reg_code)
             flash('申请用户：“'+form.username.data+'” 成功。请联系我们索取验证码。')
             return redirect(url_for('admin.adduser'))
@@ -86,6 +86,20 @@ def delete_user(user_id):
     db.session.add(thisuser)
     db.session.commit()
     flash('用户：'+username+'删除成功')
+    return redirect(url_for('admin.adduser'))
+
+
+@admin.route('/delete_user_complete/<int:user_id>', methods=['GET', 'POST'])
+@admin_required
+def delete_user_complete(user_id):
+    thisuser = User.query.filter_by(id=user_id).one()
+    if thisuser.is_administrator() or thisuser.in_use:
+        flash('不可完全删除管理员用户或已激活用户。')
+        return redirect(url_for('admin.adduser'))
+    username = thisuser.branchname
+    db.session.delete(thisuser)
+    db.session.commit()
+    flash('用户：'+username+'已完全删除。')
     return redirect(url_for('admin.adduser'))
 
 
@@ -345,7 +359,7 @@ def cardreport():
     total_consumer_pay = db.session.query(func.sum(Card.validate_consumer_pay)).filter(Card.in_use==1)
 
     bold = workbook.add_format({'bold': True})
-    money = workbook.add_format({'num_format': '#,##0'})
+    money = workbook.add_format({'num_format': '#,##0.00'})
     merge_format = workbook.add_format({
         'bold':     True,
         'align':    'center',
@@ -422,7 +436,7 @@ def printrecord():
     worksheet.set_column(0, 0, width=25)
     worksheet.set_column(1, 1, width=15)
     bold = workbook.add_format({'bold': True})
-    money = workbook.add_format({'num_format': '#,##0'})
+    money = workbook.add_format({'num_format': '#,##0.00'})
     merge_format = workbook.add_format({
         'bold':     True,
         'align':    'center',

@@ -84,9 +84,7 @@ class User(UserMixin, db.Model):
     @staticmethod
     def insert_admin():
         admin_user1 = User(username='admin', password='root', branchname='head')
-        admin_user2 = User(username='admin2', password='root', branchname='head2')
-        admin_user2.role = Role.query.filter_by(permissions=0xff).first()
-        db.session.add(admin_user1, admin_user2)
+        db.session.add(admin_user1)
         db.session.commit()
 
     def reg(self, reg_code, reg_host):

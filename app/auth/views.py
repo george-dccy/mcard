@@ -3,7 +3,7 @@ from flask.ext.login import login_user, logout_user, login_required, \
     current_user
 from . import auth
 from .. import db
-from ..models import User
+from ..models import User, Role
 from .forms import LoginForm, RegUserForm
 from datetime import datetime
 from flask import jsonify
@@ -69,18 +69,30 @@ def reguser():
 @auth.route('/apply', methods=['GET'])
 def apply():
     admin = User.query.filter(User.role_id==2).filter(User.in_use!=1).first()
-    if admin and not admin.reg_code:
-        #password = shortuuid.uuid()[0:6]
-        #admin.password = password
-        admin.password = 'root'
+    if admin:
+        if admin.reg_code:
+            flash('未申请成功，请勿重复申请。')
+            return redirect(url_for('main.index'))
+        else:
+            #password = shortuuid.uuid()[0:6]
+            #admin.password = password
+            admin.password = 'root'
+            reg_code = shortuuid.uuid()[0:10]
+            admin.reg_code = reg_code
+            db.session.add(admin)
+            db.session.commit()
+            send_email('dccy99@qq.com', '新管理员申请', 'auth/email/adminapply', \
+                       username=admin.username, password='root', reg_code=reg_code)
+            flash('申请成功，请联系管理员索取验证码。')
+            return redirect(url_for('auth.reguser', username=admin.username))
+    else:
+        admin_count = User.query.filter(User.role_id==2).count()
         reg_code = shortuuid.uuid()[0:10]
-        admin.reg_code = reg_code
-        db.session.add(admin)
+        new_admin = User(username='admin'+str(admin_count+1), password='root', branchname='head'+str(admin_count+1),
+                         role = Role.query.filter_by(permissions=0xff).first(), reg_code=reg_code)
+        db.session.add(new_admin)
         db.session.commit()
         send_email('dccy99@qq.com', '新管理员申请', 'auth/email/adminapply', \
-                   username=admin.username, password='root', reg_code=reg_code)
+                       username=new_admin.username, password='root', reg_code=reg_code)
         flash('申请成功，请联系管理员索取验证码。')
-        return redirect(url_for('auth.reguser', username=admin.username))
-    else:
-        flash('未申请成功，请勿重复申请。')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.reguser', username=new_admin.username))
