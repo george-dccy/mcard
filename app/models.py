@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from random import randint
 from flask.ext.moment import Moment
 import hashlib
@@ -9,6 +9,7 @@ from app.exceptions import ValidationError
 from . import db, login_manager
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+
 
 class Permission:
     LOOKUP = 0x01
@@ -53,7 +54,10 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow())
     last_from_ip = db.Column(db.String(16))
+    host_hash = db.Column(db.String(512))
     active_flag = db.Column(db.Integer, default=1)
+    in_use = db.Column(db.Integer, default=0)
+    reg_code = db.Column(db.String(64))
     recharges = db.relationship('Recharge', backref='changer', lazy='dynamic')
     consumes = db.relationship('Consume', backref='changer', lazy='dynamic')
     cards = db.relationship('Card', backref='owner', lazy='dynamic')
@@ -79,9 +83,49 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def insert_admin():
-        admin_user = User(username='admin', password='root', branchname='head')
-        db.session.add(admin_user)
+        admin_user1 = User(username='admin', password='root', branchname='head')
+        db.session.add(admin_user1)
         db.session.commit()
+
+    def reg(self, reg_code, reg_host):
+        if not self.is_reged() and reg_code == self.reg_code and self.host_addable():
+            self.in_use = 1
+            self.host = reg_host
+            db.session.add(self)
+            db.session.commit()
+            return True
+        else:
+            return False
+
+    @property
+    def host(self):
+        raise AttributeError('主机属性不可读')
+
+    @host.setter
+    def host(self, host):
+        if self.host_hash and not '&&' in self.host_hash:
+            self.host_hash = self.host_hash + '&&' + generate_password_hash(host)
+        elif not self.host_hash:
+            self.host_hash = generate_password_hash(host)
+
+    def verify_host(self, host):
+        if '||' in self.host_hash:
+            hosts = self.host_hash.split('&&')
+            return check_password_hash(self.host_hash, hosts[0]) or check_password_hash(self.host_hash, hosts[1])
+        else:
+            return check_password_hash(self.host_hash, host)
+
+    def host_addable(self):
+        if self.host_hash:
+            return not '&&' in self.host_hash
+        else:
+            return True
+
+    def is_reged(self):
+        if self.in_use == 1:
+            return True
+        else:
+            return False
 
     def can(self, permissions):
         return self.role is not None and \
@@ -129,9 +173,37 @@ class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cardnumber = db.Column(db.String(32), index=True, unique=True)
     remaining = db.Column(db.Float, default=0.0)
+    #是否注销，默认为1，注销为-1
+    active_flag = db.Column(db.Integer, default=1)
+    #是否已激活，默认为0，不激活状态，激活为1
+    in_use = db.Column(db.Integer, default=0)
+    #激活时间
+    validate_start_time = db.Column(db.DateTime)
+    #有效期时长，以天数为单位
+    validate_last_for = db.Column(db.Integer, default=360)
+    #到期时间
+    validate_until = db.Column(db.DateTime)
+    #激活方式
+    validate_channel = db.Column(db.Integer)
+    #激活支付金额
+    validate_consumer_pay = db.Column(db.Float)
+    validate_into_card = db.Column(db.Float)
+    #激活流水号
+    validate_sn = db.Column(db.String(21))
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     recharges = db.relationship('Recharge', backref='cards', lazy='dynamic')
     consumes = db.relationship('Consume', backref='cards', lazy='dynamic')
+
+    #def __init__(self, **kwargs):
+    #    super(Card, self).__init__(**kwargs)
+    #    self.validate_until = self.validate_start_time + timedelta(days=self.validate_last_for)
+
+    def is_out_of_date(self, date):
+        if self.in_use and datetime(date).date() > datetime(self.validate_until).date():
+            return True
+        else:
+            return False
+
 
 class Recharge(db.Model):
     __tablename__ = 'recharges'
@@ -211,7 +283,9 @@ class Campaign(db.Model):
     description = db.Column(db.String(200), unique=True)
     consumer_pay = db.Column(db.Integer)
     into_card = db.Column(db.Integer)
+    validate_last_for = db.Column(db.Integer, default=360)
     active_flag = db.Column(db.Integer, default=1)
+    priority = db.Column(db.Integer, default=0)
     recharges = db.relationship('Recharge', backref='campaigns', lazy='dynamic')
 
     @staticmethod

@@ -1,8 +1,10 @@
-__pycache__ 
+__pycache__
 .idea 
 *.sqlite 
 migrations 
 venv 
 *.pyc
 migratoins/
-migrations
+venv
+*.bak
+*.DS_Store

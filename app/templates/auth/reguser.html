@@ -1,18 +1,15 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}会员卡管理系统 - 用户登录{% endblock %}
+{% block title %}会员卡管理系统 - 用户激活{% endblock %}
 
 {% block page_content %}
 <div class="page-header">
-    <h1>登录</h1>
+    <h1>激活用户</h1>
 </div>
 <div class="col-md-4">
     {{ wtf.quick_form(form) }}
     <br>
-<!--
-    <p>忘记密码？ <a href="{{ url_for('admin.password_reset') }}">重置密码</a></p>
-!-->
 </div>
 {% endblock %}
 
@@ -23,7 +20,12 @@
         lsitem = 'hostinfo_' + document.getElementById("username").value;
         try{
             input = document.getElementById("hide_host");
-            input.value = localStorage.getItem(lsitem);
+            if (localStorage.getItem(lsitem)) {
+                input.value = 'regged';
+            }else{
+                localStorage.setItem(lsitem, guid());
+                input.value = localStorage.getItem(lsitem);
+            }
         }catch (err){
             var btn = document.getElementById("submit");
             btn.disabled=true;
@@ -37,6 +39,12 @@
 
     document.getElementById('submit').addEventListener('click', HostInfo);
 
+    function guid() {
+        function S4() {
+           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        }
+        return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+}
     function hide_host_input(){
         input = document.getElementById("hide_host");
         input.parentElement.style.display = "none";

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}充值打印{% endblock %}
+{% block title %}激活打印{% endblock %}
 
 {% block scripts %}
 {{ super() }}
@@ -10,12 +10,12 @@
 	function RechargePrint() {
 		CreateRechargePrintPage();
 		LODOP.PRINT();
-        window.location.replace("recharge")
+        window.location.replace("newcard")
 	};
 	function RechargePreview() {
 		CreateRechargePrintPage();
 		LODOP.PREVIEW();
-        window.location.replace("recharge")
+        window.location.replace("newcard")
 	};
 
     function AddTitle(){
@@ -36,7 +36,7 @@
 		LODOP.ADD_PRINT_TEXT(180,15,100,20,"时间  ");
 		LODOP.SET_PRINT_STYLEA(5,"FontSize",10);
 		LODOP.SET_PRINT_STYLEA(5,"Bold",1);
-        LODOP.ADD_PRINT_TEXT(210,15,100,20,"充值金额");
+        LODOP.ADD_PRINT_TEXT(210,15,100,20,"付款方式");
 		LODOP.SET_PRINT_STYLEA(6,"FontSize",10);
 		LODOP.SET_PRINT_STYLEA(6,"Bold",1);
         LODOP.ADD_PRINT_TEXT(240,15,100,20,"卡内余额");
@@ -48,16 +48,16 @@
 		AddTitle();
         LODOP.SET_PRINT_PAGESIZE(3,760,300,""); //设定纸张大小
 		LODOP.SET_PRINT_STYLE("FontSize",10);
-		LODOP.ADD_PRINT_TEXT(42,105,100,25,"充值凭证");
+		LODOP.ADD_PRINT_TEXT(42,105,100,25,"激活凭证");
 		LODOP.SET_PRINT_STYLEA(9,"FontName","楷书");
 		LODOP.SET_PRINT_STYLEA(9,"FontSize",13);
-		LODOP.ADD_PRINT_TEXT(90,85,300,20,{{ lastrecharge[0].sn|tojson|safe }});
-		LODOP.ADD_PRINT_TEXT(120,85,300,20,{{ lastrecharge[0].cardnumber|tojson|safe }});
-		LODOP.ADD_PRINT_TEXT(150,85,300,20,{{ lastrecharge[0].branchname|tojson|safe }});
-		LODOP.ADD_PRINT_TEXT(180,85,300,20,moment({{ lastrecharge[0].change_time|tojson|safe }}).format(('YYYY-M-D HH:mm:ss')));
-        LODOP.ADD_PRINT_TEXT(210,85,300,20,{{ lastrecharge[0].into_card|tojson|safe }} + " 元");
-        LODOP.ADD_PRINT_TEXT(240,85,300,20,{{ lastrecharge[0].remaining|tojson|safe }} + " 元");
-        LODOP.ADD_PRINT_BARCODE(280,90,128,128,"QRCode",{{ lastrecharge[0].sn|tojson|safe }});
+		LODOP.ADD_PRINT_TEXT(90,85,300,20,{{ lastvalidate.validate_sn|tojson|safe }});
+		LODOP.ADD_PRINT_TEXT(120,85,300,20,{{ lastvalidate.cardnumber|tojson|safe }});
+		LODOP.ADD_PRINT_TEXT(150,85,300,20,{{ validate_user|tojson|safe }});
+		LODOP.ADD_PRINT_TEXT(180,85,300,20,moment({{ lastvalidate.validate_start_time|tojson|safe }}).format(('YYYY-M-D HH:mm:ss')));
+        LODOP.ADD_PRINT_TEXT(210,85,300,20,{% if lastvalidate.validate_channel == 1 %}现金{% elif lastvalidate.validate_channel == 2 %}刷卡{% endif %});
+        LODOP.ADD_PRINT_TEXT(240,85,300,20,{{ lastvalidate.remaining|tojson|safe }} + " 元");
+        LODOP.ADD_PRINT_BARCODE(280,90,128,128,"QRCode",{{ lastvalidate.validate_sn|tojson|safe }});
 	};
     window.onload=RechargePreview;
 

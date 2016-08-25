@@ -26,7 +26,8 @@
     <tr>
         <th>用户名</th>
         <th>门店名</th>
-        <th>最后登录时间</th>
+        <th>最后活跃时间</th>
+        <th>状态</th>
         <th>修改</th>
         <th>删除</th>
     </tr>
@@ -37,12 +38,18 @@
         <td>{{ user.username }}</td>
         <td>{{ user.branchname }}</td>
         <td>{{ moment(user.last_seen).format('YYYY年M月D日 HH:mm:ss') }}</td>
-        <td><form name="alteruser" action="{{ url_for('admin.alter_user', user_id=user.id)}}" method="get">
+        <td>{% if user.in_use %}已激活{% else %}未激活{% endif %}</td>
+        <td>{% if user.in_use %}
+            <form name="alteruser" action="{{ url_for('admin.alter_user', user_id=user.id)}}" method="get">
                 <input type="submit" value="修改" />
             </form>
+            {% endif %}
         </td>
         <td>
-            <form name="deleteuser" action="{{ url_for('admin.delete_user', user_id=user.id)}}" method="get">
+            <form name="deleteuser" action="
+            {% if user.in_use == 1 %}{{ url_for('admin.delete_user', user_id=user.id)}}
+            {% elif user.in_use != 1 %}{{ url_for('admin.delete_user_complete', user_id=user.id)}}{% endif %}
+            " method="get">
                 <input type="submit" value="删除" />
             </form>
         </td>

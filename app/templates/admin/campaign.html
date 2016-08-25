@@ -28,6 +28,7 @@
         <th>营销方案</th>
         <th>客户支付金额</th>
         <th>实际入卡金额</th>
+        <th>默认方案</th>
         <th>修改</th>
         <th>删除</th>
     </tr>
@@ -38,13 +39,18 @@
         <td>{{ campaign.description }}</td>
         <td>{{ campaign.consumer_pay }}</td>
         <td>{{ campaign.into_card }}</td>
-        <td>{% if campaign.id != 1 %}<form name="altercampaign" action="{{ url_for('admin.alter_campaign', campaign_id=campaign.id)}}" method="get">
+        <td>{% if campaign.priority == 9 %}默认{% else %}
+            <form name="setdefaultcampaign" action="{{ url_for('admin.setdefaultcampaign', campaign_id=campaign.id)}}" method="get">
+                <input type="submit" value="设为默认" />
+            </form>
+        {% endif %}</td>
+        <td>{% if count > 1 %}<form name="altercampaign" action="{{ url_for('admin.alter_campaign', campaign_id=campaign.id)}}" method="get">
                 <input type="submit" value="修改" />
             </form>
             {% endif %}
         </td>
         <td>
-            {% if campaign.id != 1 %}<form name="deletecampaign" action="{{ url_for('admin.delete_campaign', campaign_id=campaign.id)}}" method="get">
+            {% if count > 1 %}<form name="deletecampaign" action="{{ url_for('admin.delete_campaign', campaign_id=campaign.id)}}" method="get">
                 <input type="submit" value="删除" />
             </form>
             {% endif %}

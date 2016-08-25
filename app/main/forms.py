@@ -8,11 +8,17 @@ from ..models import Role, User, Card, Campaign, Consume, Recharge
 
 class NewCardForm(Form):
     cardnumber = StringField('卡号', validators=[DataRequired(), Length(1, 20, message='卡号长度错误')])
+    remaining = FloatField('余额', render_kw={"readOnly": "readOnly"})
+    channel = SelectField('付款方式', coerce=int, choices=[(1, '现金'), (2, '刷卡')])
     submit = SubmitField('确定提交')
 
     def validate_cardnumber(self, field):
         if Card.query.filter_by(cardnumber=field.data).first():
-            raise ValidationError('该卡已存在')
+            thiscard = Card.query.filter_by(cardnumber=field.data).first()
+            if thiscard.in_use:
+                raise ValidationError('该卡已激活')
+        else:
+            raise ValidationError('该卡不存在')
 
 
 class RechargeForm(Form):
@@ -43,7 +49,11 @@ class ConsumeForm(Form):
     submit = SubmitField('提交')
 
     def validate_cardnumber(self, field):
-        if Card.query.filter_by(cardnumber=field.data).first() is None:
+        thiscard = Card.query.filter_by(cardnumber=field.data).first()
+        if thiscard:
+            if thiscard.in_use != 1 or thiscard.active_flag != 1:
+                raise ValidationError('卡未激活或已注销')
+        else:
             raise ValidationError('该卡不存在')
 
     def validate_expense(self, field):
@@ -54,7 +64,7 @@ class ConsumeForm(Form):
 
 class CardLookupForm(Form):
     cardnumber = StringField('卡号', validators=[DataRequired(), Length(1, 20, message='卡号长度错误')])
-    submit = SubmitField('余额查询')
+    submit = SubmitField('查询')
 
     def validate_cardnumber(self, field):
         if Card.query.filter_by(cardnumber=field.data).first() is None:

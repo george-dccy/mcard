@@ -7,7 +7,9 @@ from .. import db
 from ..models import Permission, Role, User, Card, Campaign, Recharge, Consume
 from ..decorators import admin_required, permission_required
 from .forms import NewCardForm, RechargeForm, ConsumeForm, CardLookupForm, RecordLookupForm
-from datetime import datetime
+from datetime import datetime, timedelta
+from flask.json import jsonify
+from random import randint
 
 @main.after_app_request
 def after_request(response):
@@ -36,13 +38,50 @@ def newcard():
     form = NewCardForm()
     if form.validate_on_submit():
         cardnumber = form.cardnumber.data
-        card = Card(cardnumber=cardnumber,
-                    owner=current_user._get_current_object())
-        db.session.add(card)
-        db.session.commit()
-        flash('添加会员卡成功。')
-        return redirect(url_for('.recharge'))
+        channel = form.channel.data
+        thiscard = Card.query.filter_by(cardnumber=cardnumber).first()
+        if not thiscard.in_use and thiscard.active_flag != -1:
+            thiscard.validate_start_time=datetime.utcnow()
+            thiscard.validate_until = thiscard.validate_start_time + timedelta(days=thiscard.validate_last_for)
+            thiscard.validate_channel = channel
+            thiscard.owner=current_user._get_current_object()
+            thiscard.in_use=1
+            #激活类别码为19
+            prefix = '19'
+            #生成分店ID
+            if len(str(thiscard.owner_id)) == 1:
+                bNum = '000' + str(thiscard.owner_id)
+            elif len(str(thiscard.owner_id)) == 2:
+                bNum = '00' + str(thiscard.owner_id)
+            elif len(str(thiscard.owner_id)) == 3:
+                bNum = '0' + str(thiscard.owner_id)
+            else:
+                bNum = str(thiscard.owner_id)
+            #生成时间码
+            nowTime=datetime.now().strftime("%Y%m%d%H%M")
+            #生成三位随机数
+            randomNum=randint(100, 999)
+            thiscard.validate_sn = prefix + bNum + str(nowTime) + str(randomNum)
+            db.session.add(thiscard)
+            db.session.commit()
+            flash('会员卡：'+cardnumber+'激活成功。')
+            lastvalidate = Card.query.filter_by(cardnumber=cardnumber).first()
+            validate_user = thiscard.owner.branchname
+            #flash('充值成功。')
+            return render_template('printnewcard.html', lastvalidate=lastvalidate, validate_user=validate_user)
+        else:
+            flash('无法激活。')
+            return redirect(url_for('main.newcard'))
     return render_template('newcard.html', form=form)
+
+
+@main.route('/newcard_remaining')
+@login_required
+def newcard_remaining():
+    cardnumber = request.args.get('cardnumber', '', type=str)
+    thiscard = Card.query.filter_by(cardnumber=cardnumber).first()
+    result = thiscard.remaining
+    return jsonify(result = result)
 
 
 @main.route('/recharge', methods=['GET', 'POST'])
@@ -118,9 +157,7 @@ def cardlookup():
 @login_required
 def card(card_id):
     card = Card.query.get_or_404(card_id)
-    cardnumber = card.cardnumber
     owner = card.owner.branchname
-    remaining = card.remaining
 #    user_id = current_user._get_current_object().id
 #    lastrecharge = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
 #                                   Recharge.consumer_pay,Recharge.channel).\
@@ -129,5 +166,5 @@ def card(card_id):
 #    lastconsume = db.session.query(Consume.sn,Card.cardnumber,Consume.expense,User.branchname,Consume.change_time).\
 #        filter(Card.id==card.id).filter(User.id==user_id).filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
 #        order_by(Consume.change_time.desc()).limit(2).all()
-    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining,)
+    return render_template('card.html', thiscard=card, owner=owner)
 #    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining, lastrecharge=lastrecharge, lastconsume=lastconsume)

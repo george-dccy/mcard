@@ -6,14 +6,14 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>你好, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}请登录{% endif %}!</h1>
+    <h1>你好, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}请<a href="{{ url_for('auth.login') }}">登录</a>{% endif %}!</h1>
 </div>
 
 <div class="post-tabs">
     <div class="tab-pane">
         {% if current_user.is_authenticated %}
         <p>当前时间为：{{ moment(current_time).format('YYYY-M-D HH:mm:ss') }}</p>
-        <p>上次离开时间为：{{ moment(last_seen).format('YYYY-M-D HH:mm:ss') }}
+        <p>最后活跃时间为：{{ moment(last_seen).format('YYYY-M-D HH:mm:ss') }}
             {% if last_from_ip %}，登录地址为：{{ last_from_ip }}{% endif %}</p>
         <p>您在{{ moment(current_time).fromNow(refresh=True) }}登录本页。</p>
         <p>请选择相应业务</p>
