@@ -54,7 +54,7 @@ class CardInitForm(Form):
     def __init__(self, *args, **kwargs):
         super(CardInitForm, self).__init__(*args, **kwargs)
         self.campaign.choices = [(campaign.id, campaign.description)
-                                  for campaign in Campaign.query.order_by(Campaign.priority.desc()).all()]
+                                  for campaign in Campaign.query.filter(Campaign.active_flag!=-1).order_by(Campaign.priority.desc()).all()]
 
     def validate_campaign(self, field):
         if field.data is None:
