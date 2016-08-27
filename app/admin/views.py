@@ -414,6 +414,7 @@ def cardreport():
     worksheet.write(row+1, col+6, total_consumer_pay[0][0], money)
     workbook.close()
     output.seek(0)
+    output.flush()
     filename = 'cardReport' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
                      as_attachment=True, attachment_filename=filename)
