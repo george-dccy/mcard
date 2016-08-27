@@ -55,7 +55,7 @@
 		LODOP.ADD_PRINT_TEXT(120,85,300,20,{{ lastvalidate.cardnumber|tojson|safe }});
 		LODOP.ADD_PRINT_TEXT(150,85,300,20,{{ validate_user|tojson|safe }});
 		LODOP.ADD_PRINT_TEXT(180,85,300,20,moment({{ lastvalidate.validate_start_time|tojson|safe }}).format(('YYYY-M-D HH:mm:ss')));
-        LODOP.ADD_PRINT_TEXT(210,85,300,20,{% if lastvalidate.validate_channel == 1 %}现金{% elif lastvalidate.validate_channel == 2 %}刷卡{% endif %});
+        LODOP.ADD_PRINT_TEXT(210,85,300,20,{% if lastvalidate.validate_channel|tojson|safe == 1 %}现金{% elif lastvalidate.validate_channel|tojson|safe == 2 %}刷卡{% endif %});
         LODOP.ADD_PRINT_TEXT(240,85,300,20,{{ lastvalidate.remaining|tojson|safe }} + " 元");
         LODOP.ADD_PRINT_BARCODE(280,90,128,128,"QRCode",{{ lastvalidate.validate_sn|tojson|safe }});
 	};
