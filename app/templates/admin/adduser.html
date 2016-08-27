@@ -61,3 +61,13 @@
 </div>
 {% endif %}
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+
+    $(document).ready(function(){
+        $("#username").focus();
+    });
+</script>
+{% endblock %}

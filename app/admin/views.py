@@ -281,9 +281,9 @@ def alter_card():
     pass
 
 
-@admin.route('/delect_card/<int:card_id>', methods=['GET', 'POST'])
+@admin.route('/delete_card/<int:card_id>', methods=['GET', 'POST'])
 @admin_required
-def delect_card(card_id):
+def delete_card(card_id):
     thiscard = Card.query.filter_by(id=card_id).first()
     if thiscard:
         db.session.delete(thiscard)
