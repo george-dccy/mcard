@@ -46,9 +46,9 @@
 	};
 	function CreateConsumePrintPage() {
 		AddTitle();
-        LODOP.SET_PRINT_PAGESIZE(3,760,500,""); //设定纸张大小
+        LODOP.SET_PRINT_PAGESIZE(3,760,300,""); //设定纸张大小
 		LODOP.SET_PRINT_STYLE("FontSize",10);
-		LODOP.ADD_PRINT_TEXT(42,85,100,25,"消费凭证");
+		LODOP.ADD_PRINT_TEXT(42,90,100,25,"消费凭证");
 		LODOP.SET_PRINT_STYLEA(9,"FontName","楷书");
 		LODOP.SET_PRINT_STYLEA(9,"FontSize",13);
 		LODOP.ADD_PRINT_TEXT(90,85,300,20,{{ lastconsume[0].sn|tojson|safe }});
