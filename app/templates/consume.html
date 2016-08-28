@@ -25,6 +25,25 @@
             btn.disabled=true;
  		 }
 	};
+
+    $(document).ready(function(){
+        $("#cardnumber").focus();
+    });
+
+    $(function(){
+        var SCRIPT_ROOT = {{request.script_root|tojson|safe}};
+        $('input[name="cardnumber"]').bind('change', function(){
+            $.getJSON(SCRIPT_ROOT + '/card_check_validate_until',{
+                cardnumber: $('input[name="cardnumber"]').val()
+            },
+            function(data){
+                var r=$("<span></span>").text(data.result);
+                $('input[name="remaining"]').append(r);
+            }
+            );
+        })
+    });
+
     window.onload=CheckIsInstall;
 </script>
 {% endblock %}

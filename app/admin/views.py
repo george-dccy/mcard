@@ -392,7 +392,8 @@ def cardreport():
     col = 0
     for onecard in cards:
         worksheet.write(row, col, onecard.cardnumber)
-        worksheet.write(row, col+1, onecard.branchname)
+        if onecard.in_use == 1:
+            worksheet.write(row, col+1, onecard.branchname)
         worksheet.write(row, col+2, onecard.remaining, money)
         if onecard.in_use == 1:
             if datetime.now().date() > onecard.validate_until.date():

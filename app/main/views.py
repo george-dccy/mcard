@@ -88,6 +88,18 @@ def newcard_remaining():
     return jsonify(result = result)
 
 
+@main.route('/card_check_validate_until')
+@login_required
+def card_check_validate_until():
+    cardnumber = request.args.get('cardnumber', '', type=str)
+    thiscard = Card.query.filter_by(cardnumber=cardnumber).first()
+    if datetime.now().date() > thiscard.validate_until.date():
+        result = '已过期'
+    else:
+        result = '正常使用'
+    return jsonify(result = result)
+
+
 @main.route('/recharge', methods=['GET', 'POST'])
 @login_required
 def recharge():
@@ -130,7 +142,7 @@ def consume():
         remaining = card.remaining
         changer_id = current_user._get_current_object().id
         if expense > remaining:
-            flash('余额不足。')
+            flash('余额不足。', 'error')
             return redirect(url_for('main.consume'))
         newconsume = Consume(card_id=card_id,
                              changer_id=changer_id,
@@ -163,7 +175,7 @@ def card(card_id):
     card = Card.query.get_or_404(card_id)
     owner = card.owner.branchname
     if card.in_use == 1:
-        if datetime.utcnow()>card.validate_until:
+        if datetime.utcnow().date() < card.validate_until.date():
             card_status = '已过期'
         else:
             card_status = '已激活'
