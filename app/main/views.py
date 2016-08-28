@@ -83,8 +83,11 @@ def newcard():
 @login_required
 def newcard_remaining():
     cardnumber = request.args.get('cardnumber', '', type=str)
-    thiscard = Card.query.filter_by(cardnumber=cardnumber).first()
-    result = thiscard.remaining
+    thiscard = Card.query.filter(Card.cardnumber==cardnumber).filter(Card.in_use==1).filter(Card.active_flag==1).first()
+    if thiscard:
+        result = thiscard.remaining
+    else:
+        result = ''
     return jsonify(result = result)
 
 
