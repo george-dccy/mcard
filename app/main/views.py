@@ -175,7 +175,7 @@ def card(card_id):
     card = Card.query.get_or_404(card_id)
     owner = card.owner.branchname
     if card.in_use == 1:
-        if datetime.utcnow().date() < card.validate_until.date():
+        if datetime.utcnow().date() > card.validate_until.date():
             card_status = '已过期'
         else:
             card_status = '已激活'
