@@ -37,7 +37,7 @@
     <tr>
         <td>{{ user.username }}</td>
         <td>{{ user.branchname }}</td>
-        <td>{{ moment(user.last_seen).format('YYYY年M月D日 HH:mm:ss') }}</td>
+        <td>{% if user.in_use %}{{ moment(user.last_seen).format('YYYY年M月D日 HH:mm:ss') }}{% endif %}</td>
         <td>{% if user.in_use %}已激活{% else %}未激活{% endif %}</td>
         <td>{% if user.in_use %}
             <form name="alteruser" action="{{ url_for('admin.alter_user', user_id=user.id)}}" method="get">
