@@ -6,7 +6,7 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>天福茗茶会员卡系统, {% if current_user.is_authenticated %}欢迎{{ current_user.username }}登录。{% else %}请<a href="{{ url_for('auth.login') }}">登录</a>{% endif %}!</h1>
+    <h1>天福茗茶会员卡系统, {% if current_user.is_authenticated %}欢迎{{ current_user.username }}登录{% else %}请<a href="{{ url_for('auth.login') }}">登录</a>{% endif %}!</h1>
 </div>
 
 <div class="post-tabs">

@@ -146,7 +146,7 @@ def add_campaign():
             if form.validate_last_for.data:
                 validate_last_for = form.validate_last_for.data
             else:
-                validate_last_for = 360
+                validate_last_for = 365
             campaign = Campaign(description=form.description.data,
                                 consumer_pay=form.consumer_pay.data,
                                 into_card=form.into_card.data,
@@ -157,6 +157,7 @@ def add_campaign():
             return redirect(url_for('admin.add_campaign'))
     campaigns = Campaign.query.filter(Campaign.active_flag!=-1).order_by(Campaign.priority.desc()).order_by(Campaign.id.desc()).all()
     count = Campaign.query.filter(Campaign.active_flag!=-1).count()
+    form.validate_last_for.data = '365'
     return render_template('admin/campaign.html', form=form, campaigns=campaigns, count=count)
 
 

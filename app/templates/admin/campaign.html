@@ -44,10 +44,9 @@
                 <input type="submit" value="设为默认" />
             </form>
         {% endif %}</td>
-        <td>{% if count > 1 %}<form name="altercampaign" action="{{ url_for('admin.alter_campaign', campaign_id=campaign.id)}}" method="get">
+        <td><form name="altercampaign" action="{{ url_for('admin.alter_campaign', campaign_id=campaign.id)}}" method="get">
                 <input type="submit" value="修改" />
             </form>
-            {% endif %}
         </td>
         <td>
             {% if count > 1 %}<form name="deletecampaign" action="{{ url_for('admin.delete_campaign', campaign_id=campaign.id)}}" method="get">
