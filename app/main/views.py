@@ -67,8 +67,12 @@ def newcard():
             flash('会员卡：'+cardnumber+'激活成功。')
             lastvalidate = Card.query.filter_by(cardnumber=cardnumber).first()
             validate_user = thiscard.owner.branchname
+            if lastvalidate.validate_channel == 1:
+                thischannel = '现金'
+            else:
+                thischannel = '刷卡'
             #flash('充值成功。')
-            return render_template('printnewcard.html', lastvalidate=lastvalidate, validate_user=validate_user)
+            return render_template('printnewcard.html', lastvalidate=lastvalidate, validate_user=validate_user, thischannel=thischannel)
         else:
             flash('无法激活。')
             return redirect(url_for('main.newcard'))

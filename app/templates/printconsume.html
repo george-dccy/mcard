@@ -21,7 +21,7 @@
     function AddTitle(){
 		LODOP=getLodop();
 		LODOP.PRINT_INIT("凭证打印");
-		LODOP.ADD_PRINT_TEXT(15,65,300,25,"天福茗茶欢迎您");
+		LODOP.ADD_PRINT_TEXT(15,45,300,25,"天福茗茶欢迎您");
 		LODOP.SET_PRINT_STYLEA(1,"FontName","隶书");
 		LODOP.SET_PRINT_STYLEA(1,"FontSize",18);
 		LODOP.ADD_PRINT_TEXT(90,15,100,20,"流水号  ");
@@ -46,9 +46,9 @@
 	};
 	function CreateConsumePrintPage() {
 		AddTitle();
-        LODOP.SET_PRINT_PAGESIZE(3,760,50,""); //设定纸张大小
+        LODOP.SET_PRINT_PAGESIZE(3,760,100,""); //设定纸张大小
 		LODOP.SET_PRINT_STYLE("FontSize",10);
-		LODOP.ADD_PRINT_TEXT(42,115,100,25,"消费凭证");
+		LODOP.ADD_PRINT_TEXT(42,90,100,25,"消费凭证");
 		LODOP.SET_PRINT_STYLEA(9,"FontName","楷书");
 		LODOP.SET_PRINT_STYLEA(9,"FontSize",13);
 		LODOP.ADD_PRINT_TEXT(90,85,300,20,{{ lastconsume[0].sn|tojson|safe }});
@@ -59,7 +59,7 @@
         LODOP.ADD_PRINT_TEXT(240,85,300,20,{{ lastconsume[0].remaining|tojson|safe }} + " 元");
         LODOP.ADD_PRINT_BARCODE(280,90,128,128,"QRCode",{{ lastconsume[0].sn|tojson|safe }});
 	};
-    window.onload=ConsumePreview;
+    window.onload=ConsumePrint;
 
 </script>
 {% endblock %}

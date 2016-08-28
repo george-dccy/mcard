@@ -321,7 +321,7 @@ def record():
             category_name = "激活"
             records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
                                        Card.validate_consumer_pay,Card.validate_channel)\
-                .filter(Card.owner_id==User.id).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
+                .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
         else:
             category_name = "消费"
             records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
@@ -334,7 +334,7 @@ def record():
             category_name = "激活"
             records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
                                        Card.validate_consumer_pay,Card.validate_channel).filter(User.id==user_id)\
-                .filter(Card.owner_id==User.id).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
+                .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
         else:
             category_name = "消费"
             records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
@@ -414,6 +414,7 @@ def cardreport():
     worksheet.write(row+1, col+6, total_consumer_pay[0][0], money)
     workbook.close()
     output.seek(0)
+    output.flush()
     filename = 'cardReport' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
                      as_attachment=True, attachment_filename=filename)
