@@ -8,3 +8,5 @@ migratoins/
 venv
 *.bak
 *.DS_Store
+migrations
+
