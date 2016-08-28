@@ -88,13 +88,19 @@ def newcard_remaining():
     return jsonify(result = result)
 
 
-@main.route('/card_check_validate_until')
+@main.route('/card_check_validate')
 @login_required
 def card_check_validate_until():
     cardnumber = request.args.get('cardnumber', '', type=str)
     thiscard = Card.query.filter_by(cardnumber=cardnumber).first()
-    if datetime.now().date() > thiscard.validate_until.date():
-        result = '已过期'
+    if not thiscard:
+        result = '卡不存在'
+    elif thiscard.active_flag != 1:
+        result = '卡不存在'
+    elif thiscard.in_use != 1:
+        result = '卡未激活'
+    elif datetime.now().date() > thiscard.validate_until.date():
+        result = '卡已过期'
     else:
         result = '正常使用'
     return jsonify(result = result)
@@ -141,6 +147,9 @@ def consume():
         card_id = card.id
         remaining = card.remaining
         changer_id = current_user._get_current_object().id
+        if card.in_use != 1 or card.active_flag != 1 or not card:
+            flash('卡未激活或不存在。', 'error')
+            return redirect(url_for('main.consume'))
         if expense > remaining:
             flash('余额不足。', 'error')
             return redirect(url_for('main.consume'))
