@@ -32,7 +32,7 @@
             <td>{% if thiscard.in_use == 1 %}已激活{% else %}未激活{% endif %}</td>
             <td>{% if thiscard.in_use == 1 %}{{ moment(thiscard.validate_start_time).format('YYYY-M-D') }}{% else %}无{% endif %}</td>
             <td>{% if thiscard.in_use == 1 %}{{ moment(thiscard.validate_until).format('YYYY-M-D') }}{% else %}无{% endif %}</td>
-            <td><a href="{{ url_for('admin.delete_card', card_id=thiscard.id) }}">注销</a></td>
+            <td><a href="{{ url_for('admin.delect_card', card_id=thiscard.id) }}">注销</a></td>
         </tr>
         </tbody>
     </table>
@@ -47,7 +47,7 @@
 
 <div class="col-md-11">
 <table class="table table-hover">
-    <caption>最近一次消费</caption>
+    <caption>本店最近一次消费</caption>
     <thead>
     <tr>
         <th>流水号</th>

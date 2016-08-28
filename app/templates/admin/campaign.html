@@ -64,13 +64,3 @@
 {% endif %}
 
 {% endblock %}
-
-{% block scripts %}
-{{ super() }}
-<script language="javascript" type="text/javascript">
-
-    $(document).ready(function(){
-        $("#description").focus();
-    });
-</script>
-{% endblock %}
