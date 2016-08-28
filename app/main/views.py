@@ -109,7 +109,7 @@ def card_check_validate_until():
         result = '卡已过期'
         text_class = 'text-danger'
     else:
-        result = '正常使用'
+        result = '余额'+thiscard.remaining+'元'
         text_class = 'text-success'
     return jsonify(result = result, text_class = text_class)
 
