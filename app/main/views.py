@@ -83,7 +83,7 @@ def newcard():
 @login_required
 def newcard_remaining():
     cardnumber = request.args.get('cardnumber', '', type=str)
-    thiscard = Card.query.filter(Card.cardnumber==cardnumber).filter(Card.in_use==1).filter(Card.active_flag==1).first()
+    thiscard = Card.query.filter(Card.cardnumber==cardnumber).filter(Card.active_flag==1).first()
     if thiscard:
         result = thiscard.remaining
     else:
