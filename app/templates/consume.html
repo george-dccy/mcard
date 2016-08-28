@@ -37,7 +37,10 @@
                 cardnumber: $('input[name="cardnumber"]').val()
             },
             function(data){
-                var r=$("<span></span>").addClass("text-info").text(data.result);
+                if ($('form').find('span')) {
+                    $('form').find('span').remove()
+                }
+                var r=$("<span></span>").addClass(data.text_class).text(data.result);
                 $('input[name="cardnumber"]').parent().append(r);
             }
             );

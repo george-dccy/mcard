@@ -95,15 +95,20 @@ def card_check_validate_until():
     thiscard = Card.query.filter_by(cardnumber=cardnumber).first()
     if not thiscard:
         result = '卡不存在'
+        text_class = 'text-danger'
     elif thiscard.active_flag != 1:
         result = '卡不存在'
+        text_class = 'text-danger'
     elif thiscard.in_use != 1:
         result = '卡未激活'
+        text_class = 'text-danger'
     elif datetime.now().date() > thiscard.validate_until.date():
         result = '卡已过期'
+        text_class = 'text-danger'
     else:
         result = '正常使用'
-    return jsonify(result = result)
+        text_class = 'text-success'
+    return jsonify(result = result, text_class = text_class)
 
 
 @main.route('/recharge', methods=['GET', 'POST'])
