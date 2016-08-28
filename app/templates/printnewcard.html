@@ -33,10 +33,10 @@
 		LODOP.ADD_PRINT_TEXT(150,15,100,20,"店名  ");
 		LODOP.SET_PRINT_STYLEA(4,"FontSize",10);
 		LODOP.SET_PRINT_STYLEA(4,"Bold",1);
-		LODOP.ADD_PRINT_TEXT(180,15,100,20,"时间  ");
+		LODOP.ADD_PRINT_TEXT(180,15,100,20,"激活时间");
 		LODOP.SET_PRINT_STYLEA(5,"FontSize",10);
 		LODOP.SET_PRINT_STYLEA(5,"Bold",1);
-        LODOP.ADD_PRINT_TEXT(210,15,100,20,"付款方式");
+        LODOP.ADD_PRINT_TEXT(210,15,100,20,"有效期至");
 		LODOP.SET_PRINT_STYLEA(6,"FontSize",10);
 		LODOP.SET_PRINT_STYLEA(6,"Bold",1);
         LODOP.ADD_PRINT_TEXT(240,15,100,20,"卡内余额");
@@ -55,7 +55,7 @@
 		LODOP.ADD_PRINT_TEXT(120,85,300,20,{{ lastvalidate.cardnumber|tojson|safe }});
 		LODOP.ADD_PRINT_TEXT(150,85,300,20,{{ validate_user|tojson|safe }});
 		LODOP.ADD_PRINT_TEXT(180,85,300,20,moment({{ lastvalidate.validate_start_time|tojson|safe }}).format(('YYYY-M-D HH:mm:ss')));
-        LODOP.ADD_PRINT_TEXT(210,85,300,20,{{ thischannel|tojson|safe }});
+        LODOP.ADD_PRINT_TEXT(210,85,300,20,moment({{ lastvalidate.validate_until|tojson|safe }}).format(('YYYY-M-D')));
         LODOP.ADD_PRINT_TEXT(240,85,300,20,{{ lastvalidate.remaining|tojson|safe }} + " 元");
         LODOP.ADD_PRINT_BARCODE(280,90,128,128,"QRCode",{{ lastvalidate.validate_sn|tojson|safe }});
 	};
