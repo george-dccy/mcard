@@ -10,7 +10,7 @@ class NewCardForm(Form):
     cardnumber = StringField('卡号', validators=[DataRequired(), Length(1, 20, message='卡号长度错误')])
     remaining = FloatField('余额', render_kw={"readOnly": "readOnly"})
     channel = SelectField('付款方式', coerce=int, choices=[(1, '现金'), (2, '刷卡')])
-    submit = SubmitField('确定提交')
+    submit = SubmitField('激活')
 
     def validate_cardnumber(self, field):
         if Card.query.filter_by(cardnumber=field.data).first():

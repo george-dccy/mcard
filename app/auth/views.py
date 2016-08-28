@@ -23,12 +23,12 @@ def login():
                 login_user(user, form.remember_me.data)
                 return redirect(url_for('main.index'))
             elif user.in_use == 0:
-                flash('请先激活。')
+                flash('请先激活。', 'error')
                 return redirect(url_for('auth.reguser', username=username))
             elif not user.verify_host(host):
-                flash('不能在该设备登录。')
+                flash('不能在该设备登录。', 'error')
                 return redirect(url_for('auth.login'))
-        flash('用户名或密码错误。')
+        flash('用户名或密码错误。', 'error')
     return render_template('auth/login.html', form=form)
 
 
@@ -60,7 +60,7 @@ def reguser():
             flash('账户激活成功！')
             return redirect(url_for('auth.login'))
         else:
-            flash('激活失败，请重试。')
+            flash('激活失败，请重试。', 'error')
             return redirect(url_for('auth.reguser', username=username))
     form.username.data = request.args.get('username', '')
     return render_template('auth/reguser.html', form=form)
@@ -71,7 +71,7 @@ def apply():
     admin = User.query.filter(User.role_id==2).filter(User.in_use!=1).first()
     if admin:
         if admin.reg_code:
-            flash('未申请成功，请勿重复申请。')
+            flash('未申请成功，请勿重复申请。', 'error')
             return redirect(url_for('main.index'))
         else:
             #password = shortuuid.uuid()[0:6]

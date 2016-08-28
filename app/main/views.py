@@ -74,7 +74,7 @@ def newcard():
             #flash('充值成功。')
             return render_template('printnewcard.html', lastvalidate=lastvalidate, validate_user=validate_user, thischannel=thischannel)
         else:
-            flash('无法激活。')
+            flash('无法激活。', 'error')
             return redirect(url_for('main.newcard'))
     return render_template('newcard.html', form=form)
 

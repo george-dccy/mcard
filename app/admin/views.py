@@ -30,7 +30,7 @@ def adduser():
                 flash('成功恢复用户：'+thisuser.branchname+'，并使用新的密码登录')
                 return redirect(url_for('admin.adduser'))
             else:
-                flash('用户已存在')
+                flash('用户已存在', 'error')
                 return redirect(url_for('admin.adduser'))
         else:
             reg_code = shortuuid.uuid()[0:10]
@@ -66,10 +66,10 @@ def alter_user(user_id):
                 flash('成功修改用户：'+thisuser.branchname)
                 return redirect(url_for('admin.adduser'))
             else:
-                flash('修改失败，请重试')
+                flash('修改失败，请重试', 'error')
                 return redirect(url_for('admin.alter_user', user_id=user_id))
         else:
-            flash('用户不允许修改')
+            flash('用户不允许修改', 'error')
             return redirect((url_for('main.index')))
     return render_template('admin/adduser.html', form=form, allu=None)
 
@@ -79,7 +79,7 @@ def alter_user(user_id):
 def delete_user(user_id):
     thisuser = User.query.filter_by(id=user_id).one()
     if thisuser.is_administrator():
-        flash('不可删除管理员用户。')
+        flash('不可删除管理员用户。', 'error')
         return redirect(url_for('admin.adduser'))
     username = thisuser.branchname
     thisuser.active_flag = -1
@@ -94,7 +94,7 @@ def delete_user(user_id):
 def delete_user_complete(user_id):
     thisuser = User.query.filter_by(id=user_id).one()
     if thisuser.is_administrator() or thisuser.in_use:
-        flash('不可完全删除管理员用户或已激活用户。')
+        flash('不可完全删除管理员用户或已激活用户。', 'error')
         return redirect(url_for('admin.adduser'))
     username = thisuser.branchname
     db.session.delete(thisuser)
@@ -110,7 +110,7 @@ def password_reset():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None:
-            flash('用户不存在！')
+            flash('用户不存在！', 'error')
             return redirect(url_for('main.index'))
         user.password = form.password.data
         db.session.commit()
@@ -140,7 +140,7 @@ def add_campaign():
                 flash('成功恢复营销方案：'+thiscampaign.description+'，并使用新的方案。')
                 return redirect(url_for('admin.add_campaign'))
             else:
-                flash('该方案已存在，请重试。')
+                flash('该方案已存在，请重试。', 'error')
                 return redirect(url_for('admin.add_campaign'))
         else:
             if form.validate_last_for.data:
@@ -168,7 +168,7 @@ def alter_campaign(campaign_id):
     thisCampaign = Campaign.query.filter_by(id=campaign_id).one()
     if form.validate_on_submit():
         if thisCampaign.active_flag == -1:
-            flash('已删除方案，不可更改！')
+            flash('已删除方案，不可更改！', 'error')
             return redirect(url_for('admin.add_campaign'))
         else:
             thisCampaign.description = form.description.data
@@ -199,7 +199,7 @@ def setdefaultcampaign(campaign_id):
         flash('方案：'+thisCampaign.description+'已设置为默认。')
         return redirect(url_for('admin.add_campaign'))
     else:
-        flash('未设置成功，请重试。')
+        flash('未设置成功，请重试。', 'error')
         return redirect(url_for('admin.add_campaign'))
 
 
@@ -207,7 +207,7 @@ def setdefaultcampaign(campaign_id):
 @admin_required
 def delete_campaign(campaign_id):
     if Campaign.query.filter(Campaign.active_flag!=-1).count() <= 1:
-        flash('最后一个方案，不允许删除。')
+        flash('最后一个方案，不允许删除。', 'error')
         return redirect(url_for('admin.add_campaign'))
     thisCampaign = Campaign.query.filter_by(id=campaign_id).one()
     thisCampaign.active_flag = -1
@@ -273,7 +273,7 @@ def card(card_id):
         #return render_template('admin/cardlookup.html', cardnumber=cardnumber, owner=owner, remaining=remaining,)
         return render_template('admin/card.html', thiscard=thiscard, owner=owner, lastconsume=lastconsume)
     else:
-        flash('没有会员卡信息。')
+        flash('没有会员卡信息。', 'error')
         return redirect(url_for('admin.cardlookup'))
 
 @admin.route('/alter_card', methods=['GET', 'POST'])
