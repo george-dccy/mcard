@@ -15,3 +15,12 @@
 
 {% endblock %}
 
+{% block scripts %}
+{{ super() }}
+<script language="javascript" type="text/javascript">
+
+    $(document).ready(function(){
+        $("#cardnumber").focus();
+    });
+</script>
+{% endblock %}

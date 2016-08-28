@@ -6,7 +6,7 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>你好, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}请<a href="{{ url_for('auth.login') }}">登录</a>{% endif %}!</h1>
+    <h1>天福茗茶会员卡系统, {% if current_user.is_authenticated %}欢迎{{ current_user.username }}登录。{% else %}请<a href="{{ url_for('auth.login') }}">登录</a>{% endif %}!</h1>
 </div>
 
 <div class="post-tabs">
@@ -16,7 +16,11 @@
         <p>最后活跃时间为：{{ moment(last_seen).format('YYYY-M-D HH:mm:ss') }}
             {% if last_from_ip %}，登录地址为：{{ last_from_ip }}{% endif %}</p>
         <p>您在{{ moment(current_time).fromNow(refresh=True) }}登录本页。</p>
-        <p>请选择相应业务</p>
+
+        {% if daily_information %}
+        <p>业务提示</p>
+        <p>{{ daily_information }}</p>
+        {% endif %}
         {% endif %}
     </div>
 </div>

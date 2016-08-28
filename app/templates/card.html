@@ -14,6 +14,7 @@
         <thead>
             <tr>
                 <th>会员卡号</th>
+                <th>卡状态</th>
                 <th>开卡门店</th>
                 <th>卡内余额</th>
                 <th>有效期</th>
@@ -22,9 +23,10 @@
         <tbody>
         <tr>
             <td>{{ thiscard.cardnumber }}</td>
-            <td>{{ owner }}</td>
+            <td>{{ card_status }}</td>
+            <td>{% if thiscard.in_use == 1 %}{{ owner }}{% endif %}</td>
             <td>{{ thiscard.remaining }}</td>
-            <td>{{ moment(thiscard.validate_until).format('YYYY-M-D') }}</td>
+            <td>{% if thiscard.in_use == 1 %}{{ moment(thiscard.validate_until).format('YYYY-M-D') }}{% endif %}</td>
         </tr>
         </tbody>
     </table>

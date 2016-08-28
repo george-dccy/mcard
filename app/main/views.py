@@ -162,6 +162,13 @@ def cardlookup():
 def card(card_id):
     card = Card.query.get_or_404(card_id)
     owner = card.owner.branchname
+    if card.in_use == 1:
+        if datetime.utcnow()>card.validate_until:
+            card_status = '已过期'
+        else:
+            card_status = '已激活'
+    else:
+        card_status = '未激活'
 #    user_id = current_user._get_current_object().id
 #    lastrecharge = db.session.query(Recharge.into_card,Recharge.change_time,Card.cardnumber,User.branchname,Recharge.sn,\
 #                                   Recharge.consumer_pay,Recharge.channel).\
@@ -170,5 +177,5 @@ def card(card_id):
 #    lastconsume = db.session.query(Consume.sn,Card.cardnumber,Consume.expense,User.branchname,Consume.change_time).\
 #        filter(Card.id==card.id).filter(User.id==user_id).filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
 #        order_by(Consume.change_time.desc()).limit(2).all()
-    return render_template('card.html', thiscard=card, owner=owner)
+    return render_template('card.html', thiscard=card, owner=owner, card_status=card_status)
 #    return render_template('card.html', cardnumber=cardnumber, owner=owner, remaining=remaining, lastrecharge=lastrecharge, lastconsume=lastconsume)
