@@ -38,7 +38,7 @@
             },
             function(data){
                 var r=$("<span></span>").text(data.result);
-                $('input[name="cardnumber"]').append(r);
+                $('input[name="cardnumber"]').parentNode.append(r);
             }
             );
         })
