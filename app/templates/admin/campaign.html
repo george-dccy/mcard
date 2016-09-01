@@ -28,6 +28,7 @@
         <th>营销方案</th>
         <th>客户支付金额</th>
         <th>实际入卡金额</th>
+        <th>卡有效期</th>
         <th>默认方案</th>
         <th>修改</th>
         <th>删除</th>
@@ -39,6 +40,7 @@
         <td>{{ campaign.description }}</td>
         <td>{{ campaign.consumer_pay }}</td>
         <td>{{ campaign.into_card }}</td>
+        <td>{{ campaign.validate_last_for }}天</td>
         <td>{% if campaign.priority == 9 %}默认{% else %}
             <form name="setdefaultcampaign" action="{{ url_for('admin.setdefaultcampaign', campaign_id=campaign.id)}}" method="get">
                 <input type="submit" value="设为默认" />
