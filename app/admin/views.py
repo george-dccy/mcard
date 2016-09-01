@@ -322,12 +322,13 @@ def record():
             category_name = "激活"
             records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
                                        Card.validate_consumer_pay,Card.validate_channel)\
-                .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
+                .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).\
+                filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time).all()
         else:
             category_name = "消费"
             records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
                 filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
-                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).all()
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time).all()
     else:
         user = User.query.filter_by(id=user_id).one()
         branchname = user.branchname
@@ -335,12 +336,13 @@ def record():
             category_name = "激活"
             records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
                                        Card.validate_consumer_pay,Card.validate_channel).filter(User.id==user_id)\
-                .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).filter(Card.validate_start_time<=dateto2).all()
+                .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2)\
+                .filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time).all()
         else:
             category_name = "消费"
             records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
                 filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).filter(User.id==user_id).\
-                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).all()
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time).all()
 
     return render_template('admin/record.html', records=records, datefrom=datefrom, dateto=dateto, \
                            branchname=branchname, category_name=category_name, user_id=user_id, category=category)
