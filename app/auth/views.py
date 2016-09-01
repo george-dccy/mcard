@@ -37,8 +37,12 @@ def login():
 @login_required
 def logout():
     user_id = current_user._get_current_object().id
-    from_ip = request.headers.get('X-real-ip', request.remote_addr)
+    #from_ip = request.headers.get('X-real-ip', request.remote_addr)
     #from_ip = str(jsonify(origin=request.headers.get('X-Forwarded-For', request.remote_addr)))
+    if 'HTTP_X_FORWARDED_FOR' in request.environ:
+        from_ip = request.environ['HTTP_X_FORWARDED_FOR'].split(",")[0].strip()
+    else:
+        from_ip = request.headers.get('X-Real-IP', request.remote_addr)
     user = User.query.filter_by(id=user_id).first()
     user.last_seen = datetime.utcnow()
     user.last_from_ip = from_ip
