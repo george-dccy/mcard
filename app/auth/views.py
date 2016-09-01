@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, abort
 from flask.ext.login import login_user, logout_user, login_required, \
     current_user
 from . import auth
@@ -21,7 +21,8 @@ def login():
         if user is not None:
             if user.in_use != 0 and user.verify_password(password) and user.verify_host(host):
                 login_user(user, form.remember_me.data)
-                return redirect(url_for('main.index'))
+                next = request.args.get('next')
+                return redirect(next or url_for('main.index'))
             elif user.in_use == 0:
                 flash('请先激活。', 'error')
                 return redirect(url_for('auth.reguser', username=username))
