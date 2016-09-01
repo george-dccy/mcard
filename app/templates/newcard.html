@@ -19,7 +19,8 @@
         var SCRIPT_ROOT = {{request.script_root|tojson|safe}};
         $('input[name="cardnumber"]').bind('keyup', function(){
             $.getJSON(SCRIPT_ROOT + '/newcard_remaining',{
-                cardnumber: $('input[name="cardnumber"]').val()
+                cardnumber: $('input[name="cardnumber"]').val(),
+                        r: Math.random()
             },
             function(data){
                 $('input[name="remaining"]').val(data.result);
@@ -45,7 +46,8 @@
         var SCRIPT_ROOT = {{request.script_root|tojson|safe}};
         $('input[name="cardnumber"]').bind('change', function(){
             $.getJSON(SCRIPT_ROOT + '/card_check_validate',{
-                cardnumber: $('input[name="cardnumber"]').val()
+                cardnumber: $('input[name="cardnumber"]').val(),
+                        r: Math.random()
             },
             function(data){
                 if ($('form').find('span')) {

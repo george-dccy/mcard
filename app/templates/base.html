@@ -115,5 +115,9 @@
             elm['on' + evType] = fn;//DOM 0
         }
     }
+
+    $.ajaxSetup({
+        cache: false
+    });
 </script>
 {% endblock %}
