@@ -49,7 +49,7 @@ def logout():
     db.session.add(user)
     db.session.commit()
     logout_user()
-    flash('注销成功。')
+    flash('从'+from_ip+'注销成功。')
     return redirect(url_for('main.index'))
 
 
