@@ -36,7 +36,12 @@
     //    document.getElementById('hide_host').value = guid();
     //    });
 
-    document.getElementById('submit').addEventListener('click', HostInfo);
+    //document.getElementById('submit').addEventListener('click', HostInfo);
+    try{
+        addEvent(document.getElementById('submit'), 'click', HostInfo);
+    }catch (err){
+        alert("出错了！请刷新或更换浏览器后重试。")
+    }
 
     function hide_host_input(){
         input = document.getElementById("hide_host");
