@@ -368,6 +368,7 @@ def cardreport():
         'font_size': 14,
     })
     warning = workbook.add_format({'bg_color': 'ff0000'})
+    light = workbook.add_format({'font_color': '00ff00'})
 
     worksheet.merge_range('A1:H1', '所有会员卡列表', merge_format)
     worksheet.set_row(0,height=30)
@@ -398,9 +399,9 @@ def cardreport():
         worksheet.write(row, col+2, onecard.remaining, money)
         if onecard.in_use == 1:
             if datetime.now().date() > onecard.validate_until.date():
-                worksheet.write(row, col+3, '已过期')
+                worksheet.write(row, col+3, '已过期', warning)
             else:
-                worksheet.write(row, col+3, '已激活', warning)
+                worksheet.write(row, col+3, '已激活', light)
             if onecard.validate_channel == 1:
                 worksheet.write(row, col+5, '现金')
             else:
