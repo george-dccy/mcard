@@ -367,6 +367,7 @@ def cardreport():
         'valign':   'vcenter',
         'font_size': 14,
     })
+    warning = workbook.add_format({'bg_color': 'ff0000'})
 
     worksheet.merge_range('A1:H1', '所有会员卡列表', merge_format)
     worksheet.set_row(0,height=30)
@@ -399,7 +400,7 @@ def cardreport():
             if datetime.now().date() > onecard.validate_until.date():
                 worksheet.write(row, col+3, '已过期')
             else:
-                worksheet.write(row, col+3, '已激活')
+                worksheet.write(row, col+3, '已激活', warning)
             if onecard.validate_channel == 1:
                 worksheet.write(row, col+5, '现金')
             else:
@@ -419,7 +420,7 @@ def cardreport():
     output.flush()
     filename = 'cardReport' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
     return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",\
-                     as_attachment=True, attachment_filename=filename)
+                     as_attachment=True, attachment_filename=filename, cache_timeout=5)
 
 
 @admin.route('/printrecord', methods=['GET'])
