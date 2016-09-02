@@ -9,7 +9,7 @@ class Config:
     SQLALCHEMY_RECORD_QUERIES = True
     MCARD_ADMIN = os.environ.get('MCARD_ADMIN')
     MCARD_BRANCH_PER_PAGE = 10
-    MCARD_RECORD_PER_PAGE = 5
+    MCARD_RECORD_PER_PAGE = 10
     MCARD_SLOW_DB_QUERY_TIME=0.5
 
     #mail config
