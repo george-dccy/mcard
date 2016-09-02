@@ -1,6 +1,6 @@
 from app.decorators import admin_required
 from flask import render_template, redirect, request, url_for, flash, send_file
-from flask.ext.login import login_user, logout_user, login_required, current_user
+from flask.ext.login import login_user, logout_user, login_required, current_user, current_app
 from . import admin
 from .. import db
 from ..models import User, Role, Card, Campaign, Consume, Recharge
@@ -310,6 +310,7 @@ def recordlookup():
 @admin.route('/record', methods=['GET', 'POST'])
 @admin_required
 def record():
+    page = request.args.get('page', 1, type=int)
     datefrom = request.args.get('datefrom', date.today().strftime('%Y-%m-%d'), type=str)
     dateto = request.args.get('dateto', date.today().strftime('%Y-%m-%d'), type=str)
     datefrom2 = datetime.strptime(datefrom, '%Y-%m-%d') - timedelta(hours=8)
@@ -320,31 +321,35 @@ def record():
         branchname = "全部门店"
         if category == 1:
             category_name = "激活"
-            records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
+            pagination = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
                                        Card.validate_consumer_pay,Card.validate_channel)\
                 .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).\
-                filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time.desc()).all()
+                filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time.desc()).\
+                paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
         else:
             category_name = "消费"
-            records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+            pagination = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
                 filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
-                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time.desc()).all()
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time.desc()).\
+                paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
     else:
         user = User.query.filter_by(id=user_id).one()
         branchname = user.branchname
         if category == 1:
             category_name = "激活"
-            records = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
+            pagination = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
                                        Card.validate_consumer_pay,Card.validate_channel).filter(User.id==user_id)\
                 .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2)\
-                .filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time.desc()).all()
+                .filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time.desc()).\
+                paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
         else:
             category_name = "消费"
-            records = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+            pagination = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
                 filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).filter(User.id==user_id).\
-                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time.desc()).all()
-
-    return render_template('admin/record.html', records=records, datefrom=datefrom, dateto=dateto, \
+                filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time.desc()).\
+                paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
+    records = pagination.items
+    return render_template('admin/record.html', records=records, pagination=pagination, datefrom=datefrom, dateto=dateto, \
                            branchname=branchname, category_name=category_name, user_id=user_id, category=category)
 
 

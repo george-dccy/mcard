@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
 {% block title %}综合查询{% endblock %}
 
@@ -52,5 +53,10 @@
     {% endfor %}
     </tbody>
 </table>
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, 'admin.record') }}
+</div>
+{% endif %}
 </div>
 {% endblock %}
