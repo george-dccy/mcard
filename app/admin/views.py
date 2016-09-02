@@ -321,14 +321,16 @@ def record():
         branchname = "全部门店"
         if category == 1:
             category_name = "激活"
-            pagination = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
-                                       Card.validate_consumer_pay,Card.validate_channel)\
+            pagination = Card.query.join(User).add_columns(Card.validate_into_card,Card.validate_start_time,\
+                                                           Card.cardnumber,User.branchname,Card.validate_sn,\
+                                                           Card.validate_consumer_pay,Card.validate_channel)\
                 .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2).\
                 filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time.desc()).\
                 paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
         else:
             category_name = "消费"
-            pagination = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+            pagination = Consume.query.join(Card).join(User).add_columns(Consume.change_time,Consume.expense,\
+                                                                         Card.cardnumber,User.branchname,Consume.sn).\
                 filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).\
                 filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time.desc()).\
                 paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
@@ -337,14 +339,16 @@ def record():
         branchname = user.branchname
         if category == 1:
             category_name = "激活"
-            pagination = db.session.query(Card.validate_into_card,Card.validate_start_time,Card.cardnumber,User.branchname,Card.validate_sn,\
+            pagination = Card.query.join(User).add_columns(Card.validate_into_card,Card.validate_start_time,\
+                                                           Card.cardnumber,User.branchname,Card.validate_sn,\
                                        Card.validate_consumer_pay,Card.validate_channel).filter(User.id==user_id)\
                 .filter(Card.owner_id==User.id).filter(Card.in_use==1).filter(Card.validate_start_time>=datefrom2)\
                 .filter(Card.validate_start_time<=dateto2).order_by(Card.validate_start_time.desc()).\
                 paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
         else:
             category_name = "消费"
-            pagination = db.session.query(Consume.change_time,Consume.expense,Card.cardnumber,User.branchname,Consume.sn).\
+            pagination = Consume.query.join(User).join(Card).add_columns(Consume.change_time,Consume.expense,\
+                                                                         Card.cardnumber,User.branchname,Consume.sn).\
                 filter(Consume.card_id==Card.id).filter(Consume.changer_id==User.id).filter(User.id==user_id).\
                 filter(Consume.change_time>=datefrom2).filter(Consume.change_time<=dateto2).order_by(Consume.change_time.desc()).\
                 paginate(page, per_page=current_app.config['MCARD_RECORD_PER_PAGE'], error_out=False)
