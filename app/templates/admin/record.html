@@ -53,10 +53,10 @@
     {% endfor %}
     </tbody>
 </table>
+</div>
 {% if pagination %}
 <div class="pagination">
-    {{ macros.pagination_widget(pagination, 'admin.recordlookup') }}
+    {{ macros.pagination_widget(pagination, 'admin.record', datefrom=datefrom, dateto=dateto, user_id=user_id, category=category) }}
 </div>
 {% endif %}
-</div>
 {% endblock %}
